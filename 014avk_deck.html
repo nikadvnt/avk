@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>АВК — верстка слайдов</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f9f9;
+      --surface: #ffffff;
+      --border: #e4e4e7;
+      --accent: #E8374A;
+      --text: #09090B;
+      --text2: #3F3F46;
+      --muted: #71717A;
+      --muted-light: #A1A1AA;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 22px 16px 56px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 1480px; margin: 0 auto; }
+
+    .topbar{
+      position: sticky;
+      top: 12px;
+      z-index: 50;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin: 0 auto 18px;
+    }
+
+    .crumb{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .crumb a{
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .crumb a:hover{ color: var(--text2); border-color: rgba(232,55,74,0.35); }
+
+    .jump{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(9,9,11,0.02);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+    .pill:hover{
+      transform: translateY(-1px);
+      background: rgba(232,55,74,0.06);
+      border-color: rgba(232,55,74,0.35);
+      color: var(--text2);
+    }
+
+    .slides{ display:flex; flex-direction: column; gap: 18px; }
+
+    .slide{
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: var(--surface);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .slide:hover{ box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+
+    .badge{
+      position:absolute;
+      left: 12px;
+      top: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .stage{
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #fff;
+    }
+
+    .artboard{
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: 0 0;
+    }
+
+    .node{ position: absolute; }
+
+    .t{
+      color: var(--text);
+      font-weight: 400;
+      letter-spacing: var(--ls, -0.01em);
+      line-height: var(--lh, 1.35);
+      white-space: pre-wrap;
+    }
+    .t.bold{ font-weight: 800; }
+    .t.muted{ color: var(--muted-light); }
+
+    .rect{ background: #f8f8f8; }
+
+    .ellipse{
+      border: 1px solid rgba(9,9,11,0.25);
+      border-radius: 9999px;
+      background: transparent;
+      opacity: 0.7;
+    }
+
+    .img{
+      border-radius: 14px;
+      border: 1px solid rgba(9,9,11,0.10);
+      overflow: hidden;
+      background: rgba(9,9,11,0.02);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.05);
+    }
+    .img > img{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .list{
+      padding-left: 26px;
+      margin: 0;
+    }
+    .list li{ margin-bottom: 10px; }
+
+    @media (max-width: 720px){
+      .jump{ display:none; }
+      .topbar{ border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="crumb">
+        <span style="width:7px;height:7px;border-radius:999px;background:var(--accent);display:inline-block;flex:0 0 auto;"></span>
+        <span style="opacity:.9;">АВК</span>
+        <span style="opacity:.45;">•</span>
+        <a href="/index.html">главная</a>
+      </div>
+      <div class="jump" aria-label="Переход к слайдам" id="jump"></div>
+    </div>
+
+    <main class="slides" aria-label="Слайды презентации" id="slides"></main>
+  </div>
+
+  <script>
+    // Верстка по метаданным (позиции/размеры) + UI-стиль как в `sreda_map.html`.
+    // Если позже будет доступен расширенный контекст из Figma, можно точечно уточнить типографику/обводки.
+
+    const SLIDES = [
+      {
+        id: "s1",
+        label: "Слайд 01",
+        nodes: [
+          { type: "text", x: 46, y: 412, w: 1460, h: 140, size: 70, weight: "bold", text: "5 000 000 человек узнали от вас о том, \nкак работают мозг и мышление" },
+          { type: "text", x: 46, y: 655, w: 692, h: 99, size: 30, weight: "regular", text: "Давайте построим продукт, который превратит вашу методологию в ежедневную практику \nдля десятков тысяч людей" }
+        ]
+      },
+      {
+        id: "s2",
+        label: "Слайд 02",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1629, h: 70, size: 70, weight: "bold", text: "1,5 миллиона человек, которые вам доверяют" },
+          { type: "text", x: 53, y: 157, w: 1314, h: 24, size: 24, weight: "bold", tone: "muted", text: "совокупная аудитория с учётом пересечения платформ" },
+          { type: "rect", x: 46, y: 267, w: 1314, h: 292 },
+          { type: "text", x: 86, y: 305, w: 169, h: 33, size: 30, weight: "bold", text: "Платформа" },
+          { type: "text", x: 436, y: 305, w: 180, h: 33, size: 30, weight: "bold", text: "Подписчики" },
+          { type: "text", x: 797, y: 305, w: 271, h: 33, size: 30, weight: "bold", text: "Охват на материал" },
+          { type: "text", x: 86, y: 365, w: 118, h: 33, size: 30, weight: "regular", text: "YouTube" },
+          { type: "text", x: 436, y: 365, w: 107, h: 33, size: 30, weight: "regular", text: "1,16 млн" },
+          { type: "text", x: 797, y: 365, w: 439, h: 33, size: 30, weight: "regular", text: "от 20 тыс. до 4 млн просмотров" },
+          { type: "text", x: 86, y: 425, w: 138, h: 33, size: 30, weight: "regular", text: "Instagram" },
+          { type: "text", x: 436, y: 425, w: 73, h: 33, size: 30, weight: "regular", text: "1 млн" },
+          { type: "text", x: 797, y: 425, w: 418, h: 33, size: 30, weight: "regular", text: "от 50 до 200 тыс. просмотров" },
+          { type: "text", x: 86, y: 485, w: 127, h: 33, size: 30, weight: "regular", text: "Telegram" },
+          { type: "text", x: 436, y: 485, w: 98, h: 33, size: 30, weight: "regular", text: "75 тыс." },
+          { type: "text", x: 797, y: 485, w: 379, h: 33, size: 30, weight: "regular", text: "от 5 до 20 тыс. просмотров" },
+
+          { type: "text", x: 46, y: 703, w: 512, h: 262, size: 24, weight: "regular", rich: "para", text: [
+            { text: "Это не обычная аудитория.", weight: "bold" },
+            { text: "\n\nЛюди, которые читают книги по 400 страниц, смотрят часовые лекции и возвращаются \nза новым материалом годами — это аудитория с высоким порогом внимания и высоким уровнем доверия к автору. Такое доверие \nв русскоязычном интернете не покупается \nи не строится быстро." }
+          ]},
+          { type: "list", x: 645, y: 761, w: 570, h: 272, size: 24, items: [
+            "Одна из крупнейших интеллектуальных аудиторий о психологии в русскоязычном пространстве",
+            "Высокий уровень доверия к вам — аудитория следует за вами годами и принимает ваш авторитет",
+            "Суперлояльная аудитория, готовая к глубокой работе — и к регулярным платежам"
+          ]},
+          { type: "text", x: 1385, y: 812, w: 469, h: 150, size: 30, weight: "bold", text: "Вы уже располагаете главным активом для запуска глубокого подписочного продукта — аудиторией, которая вам доверяет." },
+          // Акцент (эллипс) — по метаданным, без поворота.
+          { type: "ellipse", x: 1187, y: 780, w: 909, h: 628 }
+        ]
+      },
+      {
+        id: "s3",
+        label: "Слайд 03",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1716, h: 140, size: 70, weight: "bold", text: "1,5 миллиона подписчиков — \nи ни один не платит прогнозируемо каждый месяц" },
+          { type: "text", x: 46, y: 359, w: 688, h: 144, size: 40, weight: "bold", text: "Вы создали несколько сильных бизнес-моделей, которые хорошо работают в своих форматах." },
+          { type: "text", x: 1045, y: 359, w: 570, h: 144, size: 40, weight: "bold", text: "Но у текущей бизнес-системы есть структурный пробел:" },
+          { type: "text", x: 103, y: 550, w: 574, h: 29, size: 24, weight: "bold", text: "Текущая структура бизнеса:" },
+          { type: "list", x: 103, y: 598, w: 497, h: 273, size: 24, items: [
+            "Книги — более 200 наименований, тираж 5 млн экземпляров",
+            "Академия психологии и мышления — профессиональное образование для практикующих специалистов",
+            "Онлайн-курсы и программы — B2C продукты по психологии, мышлению, отношениям"
+          ]},
+          { type: "list", x: 1093, y: 550, w: 497, h: 243, size: 24, items: [
+            "Нет ежемесячного регулярного дохода",
+            "Нет продукта, который удерживает аудиторию в долгосрочном регулярном ежедневном взаимодействии с вашей методологией",
+            "Выручка зависит от каждого нового запуска — и не растёт сама по себе"
+          ]},
+          { type: "text", x: 1129, y: 900, w: 706, h: 120, size: 30, weight: "bold", text: "Есть огромная аудитория с высоким доверием — и нет продукта, который работает с ней системно каждый день и генерирует высокий LTV. Мы видим тут большую возможность." },
+          // Акценты
+          { type: "ellipse", x: 928, y: 823, w: 1061, h: 430 }
+        ]
+      },
+      {
+        id: "s4",
+        label: "Слайд 04",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1629, h: 140, size: 70, weight: "bold", text: "3% вашей аудитории — \nэто 2,7 млрд рублей в год" },
+          { type: "text", x: 46, y: 287, w: 863, h: 31, size: 26, weight: "bold", text: "Аудитория уже существует. Осталось дать ей правильный продукт." },
+          { type: "text", x: 46, y: 426, w: 863, h: 41, size: 34, weight: "bold", text: "Простая математика:" },
+          { type: "text", x: 999, y: 426, w: 863, h: 41, size: 34, weight: "bold", text: "Почему 3% — это реалистично:" },
+          { type: "rect", x: 46, y: 498, w: 751, h: 398 },
+          { type: "text", x: 86, y: 546, w: 313, h: 33, size: 30, weight: "regular", text: "Совокупная аудитория" },
+          { type: "text", x: 508, y: 546, w: 214, h: 33, size: 30, weight: "regular", text: "1,5 млн человек" },
+          { type: "text", x: 86, y: 611, w: 374, h: 33, size: 30, weight: "regular", text: "Конверсия в платящих (3%)" },
+          { type: "text", x: 508, y: 611, w: 218, h: 33, size: 30, weight: "regular", text: "45 тыс. человек" },
+          { type: "text", x: 86, y: 676, w: 248, h: 33, size: 30, weight: "regular", text: "Подписка в месяц" },
+          { type: "text", x: 508, y: 676, w: 110, h: 33, size: 30, weight: "regular", text: "5 000 ₽" },
+          { type: "text", x: 86, y: 741, w: 231, h: 33, size: 30, weight: "regular", text: "Выручка в месяц" },
+          { type: "text", x: 508, y: 741, w: 135, h: 33, size: 30, weight: "regular", text: "225 млн ₽" },
+          { type: "text", x: 86, y: 806, w: 201, h: 33, size: 30, weight: "bold", text: "Выручка в год" },
+          { type: "text", x: 508, y: 806, w: 147, h: 33, size: 30, weight: "bold", text: "2,7 млрд ₽" },
+          { type: "list", x: 999, y: 503, w: 758, h: 238, size: 30, items: [
+            "Это стандартная конверсия для подписочных продуктов с тёплой аудиторией",
+            "Ваша аудитория значительно теплее среднего — она читает книги и смотрит лекции годами",
+            "Пилот на 1 000 человек даст первые данные уже через два месяца"
+          ]},
+          { type: "text", x: 1045, y: 912, w: 564, h: 90, size: 30, weight: "bold", text: "Аудитория уже есть. Не хватает только модели, которая превращает доверие в регулярный доход." },
+          { type: "ellipse", x: 674, y: 962, w: 1126, h: 664 }
+        ]
+      },
+      {
+        id: "s5",
+        label: "Слайд 05",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1629, h: 140, size: 64, weight: "bold", text: "Рынок ментального здоровья в России \nрастёт быстрее, чем кажется" },
+          { type: "text", x: 46, y: 287, w: 1105, h: 31, size: 16, weight: "bold", text: "Запрос на психологию, мышление и саморазвитие в России перестал быть нишевым." },
+
+          { type: "text", x: 46, y: 396, w: 863, h: 41, size: 22, weight: "bold", text: "Три сегмента рынка:" },
+          { type: "rect", x: 46, y: 468, w: 1249, h: 211 },
+          { type: "text", x: 76, y: 516, w: 560, h: 24, size: 14, weight: "bold", text: "Рынок ментального здоровья" },
+          { type: "text", x: 688, y: 516, w: 300, h: 24, size: 14, weight: "regular", text: "~650 млрд ₽ в год" },
+          { type: "text", x: 76, y: 561, w: 640, h: 24, size: 14, weight: "bold", text: "Коммерческий рынок психологических услуг" },
+          { type: "text", x: 688, y: 561, w: 300, h: 24, size: 14, weight: "regular", text: "~100 млрд ₽ в год" },
+          { type: "text", x: 76, y: 606, w: 720, h: 24, size: 14, weight: "bold", text: "Рынок саморазвития, мышления и продуктивности" },
+          { type: "text", x: 688, y: 606, w: 320, h: 24, size: 14, weight: "regular", text: "~120–150 млрд ₽ в год" },
+
+          { type: "text", x: 1006, y: 528, w: 239, h: 70, size: 44, weight: "bold", text: "17-20%" },
+          { type: "text", x: 1024, y: 598, w: 204, h: 31, size: 16, weight: "bold", text: "ежегодный рост" },
+
+          { type: "text", x: 46, y: 745, w: 863, h: 41, size: 22, weight: "bold", text: "Что разгоняет рынок:" },
+
+          { type: "text", x: 46, y: 830, w: 60, h: 31, size: 14, weight: "bold", text: "01" },
+          { type: "text", x: 46, y: 871, w: 276, h: 131, size: 12, weight: "regular", text: "Рост тревожности\nи стрессовой нагрузки —\nзапрос на инструменты\nуправления собой\nувеличивается" },
+
+          { type: "text", x: 361, y: 830, w: 60, h: 31, size: 14, weight: "bold", text: "02" },
+          { type: "text", x: 361, y: 871, w: 276, h: 105, size: 12, weight: "regular", text: "Снижение стигмы вокруг\nпсихотерапии — люди\nперестали считать это\nчем-то стыдным" },
+
+          { type: "text", x: 686, y: 830, w: 60, h: 31, size: 14, weight: "bold", text: "03" },
+          { type: "text", x: 686, y: 871, w: 179, h: 104, size: 12, weight: "regular", text: "Рост культуры\nсаморазвития\nи интереса\nк мышлению" },
+
+          { type: "text", x: 911, y: 830, w: 60, h: 31, size: 14, weight: "bold", text: "04" },
+          { type: "text", x: 911, y: 871, w: 276, h: 105, size: 12, weight: "regular", text: "Одиночество становится\nмассовым явлением —\nлюди ищут среду и\nсообщество" },
+
+          { type: "text", x: 1385, y: 812, w: 469, h: 150, size: 16, weight: "bold", text: "Спрос на понимание себя\nи работу с мышлением растёт.\nСистемных продуктов\nдля долгосрочной работы\nна этом рынке почти нет." },
+          { type: "ellipse", x: 1187, y: 780, w: 909, h: 628 }
+        ]
+      },
+      {
+        id: "s6",
+        label: "Слайд 06",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1768, h: 140, size: 58, weight: "bold", text: "Люди хотят (или думают так, что тоже ок) меняться. Но в существующих форматах это тяжело" },
+          { type: "text", x: 46, y: 267, w: 1463, h: 31, size: 16, weight: "bold", text: "Рынок наполнен курсами и терапией. Но у людей есть запросы, которые эти форматы закрывают не полностью." },
+          { type: "text", x: 46, y: 436, w: 863, h: 60, size: 22, weight: "bold", text: "4 главные боли:" },
+
+          { type: "text", x: 46, y: 534, w: 60, h: 31, size: 14, weight: "bold", text: "01" },
+          { type: "text", x: 46, y: 575, w: 414, h: 60, size: 16, weight: "bold", text: "«Я всё понимаю — и ничего не меняется»" },
+          { type: "text", x: 46, y: 645, w: 414, h: 110, size: 12, weight: "regular", text: "Прочитал книги, прошёл курс, ходил к психологу. Знает свои паттерны. Называет их по имени.\nИ продолжает делать то же самое. Проблема\nне в отсутствии знания — в отсутствии среды, которая удерживает новое поведение." },
+
+          { type: "text", x: 525, y: 534, w: 60, h: 31, size: 14, weight: "bold", text: "02" },
+          { type: "text", x: 525, y: 575, w: 414, h: 60, size: 16, weight: "bold", text: "«Я один на один со своей головой»" },
+          { type: "text", x: 525, y: 645, w: 414, h: 88, size: 12, weight: "regular", text: "Нет человека, с которым можно разобрать реальную ситуацию — не поныть, а именно разобрать. Друзья не умеют так думать. Психолог дорог. Интернет даёт советы, а не мышление." },
+
+          { type: "text", x: 1004, y: 534, w: 60, h: 31, size: 14, weight: "bold", text: "03" },
+          { type: "text", x: 1004, y: 575, w: 414, h: 30, size: 16, weight: "bold", text: "«Я начинаю и бросаю»" },
+          { type: "text", x: 1004, y: 645, w: 414, h: 88, size: 12, weight: "regular", text: "Подписывается, заходит, смотрит пару видео, пропускает неделю, забывает, отписывается. Не потому что ленивый — потому что нет внешней структуры, которая удерживает в процессе." },
+
+          { type: "text", x: 1483, y: 534, w: 60, h: 31, size: 14, weight: "bold", text: "04" },
+          { type: "text", x: 1483, y: 575, w: 414, h: 60, size: 16, weight: "bold", text: "«Мне не с кем думать на одном уровне»" },
+          { type: "text", x: 1483, y: 645, w: 414, h: 88, size: 12, weight: "regular", text: "Окружение либо не интересуется такими вещами, либо уходит в эзотерику. Хочется людей, которые думают серьёзно — но таких сложно найти в обычной жизни." },
+
+          { type: "text", x: 1004, y: 928, w: 660, h: 90, size: 16, weight: "bold", text: "Люди нуждаются в среде для регулярной работы над собой и своим мышлением. Именно это мы предлагаем построить." },
+          { type: "ellipse", x: 866, y: 830, w: 853, h: 473 }
+        ]
+      },
+      {
+        id: "s7",
+        label: "Слайд 07",
+        nodes: [] // будет заполнено копией s6 ниже
+      },
+      {
+        id: "s8",
+        label: "Слайд 08",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1768, h: 70, size: 52, weight: "bold", text: "Продуктовая идея" },
+          { type: "text", x: 46, y: 216, w: 1372, h: 180, size: 34, weight: "bold", text: "Продукт, который решает сразу две задачи: даёт\nрегулярный прогнозируемый доход и снимает\nзависимость от бесконечного производства контента" },
+
+          { type: "text", x: 46, y: 493, w: 584, h: 150, size: 12, weight: "regular", text: "Большинство подписочных продуктов держатся\nна авторе — он постоянно создаёт контент,\nпоявляется каждый день, тянет всё на себе.\nСтоит ему замедлиться — люди уходят.\n\nМы предлагаем принципиально другую модель." },
+          { type: "text", x: 46, y: 726, w: 584, h: 322, size: 12, weight: "regular", text: "Люди остаются ради продукта,\nего ценности и механик,\nа не исключительно ради\nвашего контента.\n\nПродукт даёт им то, чего они не получают нигде\nбольше: малую группу людей с похожим уровнем\nмышления, инструменты для работы с реальными\nситуациями и видимый личный прогресс. Ваша\nметодология встроена в каждую из этих механик —\nи работает без вашего ежедневного участия." },
+
+          { type: "text", x: 810, y: 493, w: 584, h: 26, size: 12, weight: "bold", text: "Два ключевых принципа:" },
+
+          { type: "text", x: 810, y: 575, w: 324, h: 26, size: 12, weight: "bold", text: "01" },
+          { type: "text", x: 810, y: 616, w: 452, h: 213, size: 12, weight: "regular", text: "Ценность продукта не равна частоте\nвашего появления.\n\nУчастники возвращаются каждую неделю —\nпотому что у них встреча группы, задача\nлаборатории, разбор из архива под их\nконкретную ситуацию. Вы — архитектор\nэтой системы, а не её единственное\nтопливо." },
+
+          { type: "text", x: 1352, y: 575, w: 324, h: 26, size: 12, weight: "bold", text: "01" },
+          { type: "text", x: 1352, y: 616, w: 452, h: 189, size: 12, weight: "regular", text: "Ваша методология масштабируется без\nвас.\n\nИнструменты, типология мышления,\nструктура разборов встроены в продукт\nтак, что участники применяют вашу\nсистему самостоятельно — в группах,\nкаждую неделю, на своей реальной\nжизни." },
+
+          { type: "text", x: 1004, y: 948, w: 660, h: 90, size: 16, weight: "bold", text: "Это не клуб, где автор обязан присутствовать\nкаждый день. Это среда, которая живёт\nна вашей методологии — и работает сама." },
+          { type: "ellipse", x: 687, y: 939, w: 1101, h: 579 }
+        ],
+        actions: [
+          { label: "Открыть карту продукта ↗", href: "/sreda_map.html" }
+        ]
+      },
+      {
+        id: "s9",
+        label: "Слайд 09",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1768, h: 70, size: 70, weight: "bold", text: "Экономика" },
+          { type: "text", x: 46, y: 186, w: 1372, h: 120, size: 44, weight: "bold", text: "От пилота до масштаба — \nприбыльная модель с первого дня" },
+
+          { type: "rect", x: 46, y: 353, w: 946, h: 396 },
+          { type: "text", x: 70, y: 375, w: 900, h: 60, size: 18, weight: "bold", tone: "muted", text: "График/таблица (скрин из презентации)" },
+
+          { type: "text", x: 46, y: 790, w: 901, h: 60, size: 20, weight: "regular", text: "Периоды: пилот — 2 месяца, далее — до следующей точки роста, 2027 и 2028 — полный год. Средний чек — 5 000 ₽. Участники растут линейно между контрольными точками." },
+          { type: "text", x: 1157, y: 928, w: 621, h: 117, size: 22, weight: "bold", text: "К концу 2028 года: 50 000 участников, 125 млн ₽ чистой прибыли ежемесячно и 1,4 млрд ₽ накопленной прибыли за три года." },
+          { type: "ellipse", x: 795, y: 915, w: 1101, h: 579 }
+        ]
+      },
+      {
+        id: "s10",
+        label: "Слайд 10",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1768, h: 70, size: 52, weight: "bold", text: "Продукт не только для вашей аудитории" },
+          { type: "text", x: 46, y: 216, w: 813, h: 72, size: 16, weight: "bold", text: "Как привлекать новых людей — и почему продукт\nсможет расти не только благодаря вашему бренду" },
+          { type: "text", x: 46, y: 326, w: 649, h: 156, size: 12, weight: "regular", text: "Желание меняться, одиночество, потребность думать\nс кем-то на одном уровне — это не только про вашу\nаудиторию. Это про всех. Продукт попадает\nв универсальный запрос, который есть у огромного числа\nлюдей, никогда не слышавших о вас — и это открывает\nрынок далеко за пределами 1,5 млн подписчиков." },
+
+          { type: "text", x: 46, y: 591, w: 511, h: 26, size: 12, weight: "bold", text: "Органические каналы — продукт сам:" },
+          { type: "text", x: 46, y: 640, w: 543, h: 197, size: 12, weight: "regular", text: "• Реферальная механика — каждый участник продукта\n  приводит друзей и знакомых. Не реклама — живая\n  рекомендация от человека, которому доверяют. Чем\n  дольше человек в продукте и чем сильнее его личный\n  результат, тем активнее он рекомендует\n\n• Офлайн-встречи в городах — гости, которых приводят\n  участники, видят продукт изнутри и становятся новыми\n  подписчиками" },
+
+          { type: "text", x: 688, y: 591, w: 511, h: 26, size: 12, weight: "bold", text: "Входная точка для холодной аудитории:" },
+          { type: "text", x: 688, y: 640, w: 543, h: 133, size: 12, weight: "regular", text: "• AI-бадди как бесплатный лид-магнит — урезанная\n  бесплатная версия бота проводит диагностику типа\n  мышления, даёт первый инсайт и естественно ведёт в\n  продукт. На него можно вести холодный трафик без\n  упоминания вас лично — просто как инструмент\n  работы над собой." },
+
+          { type: "text", x: 688, y: 826, w: 511, h: 26, size: 12, weight: "bold", text: "Платные каналы:" },
+          { type: "text", x: 688, y: 875, w: 543, h: 67, size: 12, weight: "regular", text: "• Таргет VK + TG + MAX на аудиторию конкурентов и\n  смежных тематик — психология, саморазвитие,\n  мышление" },
+
+          { type: "text", x: 1330, y: 591, w: 511, h: 26, size: 12, weight: "bold", text: "Контентные и партнёрские каналы:" },
+          { type: "text", x: 1330, y: 640, w: 543, h: 305, size: 12, weight: "regular", text: "• Инфлюенсеры через подкасты внутри продукта —\n  гости эфиров анонсируют выход у себя в соцсетях. Их\n  аудитория, никогда не слышавшая о вас, попадает в\n  воронку\n\n• Партнёрства с психологами и коучами — рекомендуют\n  продукт своим клиентам как среду между сессиями.\n  Для психолога это ценность для клиента, для продукта —\n  тёплый трафик\n\n• SEO и контент вокруг болей — материалы под запросы\n  «почему я не могу измениться», «как справиться с\n  тревогой», «одиночество» ведут на диагностику → в\n  продукт" }
+        ]
+      },
+      {
+        id: "s11",
+        label: "Слайд 11",
+        nodes: [
+          { type: "text", x: 46, y: 87, w: 1768, h: 70, size: 52, weight: "bold", text: "Стратегический момент для вас — и для рынка" },
+          { type: "text", x: 46, y: 397, w: 545, h: 36, size: 16, weight: "bold", text: "Для вас лично" },
+          { type: "text", x: 687, y: 397, w: 545, h: 36, size: 16, weight: "bold", text: "Для рынка" },
+          { type: "text", x: 1347, y: 397, w: 545, h: 36, size: 16, weight: "bold", text: "Для вашей аудитории" },
+
+          { type: "text", x: 46, y: 451, w: 526, h: 232, size: 12, weight: "regular", text: "Вы создали уникальную методологию и потратили 30 лет на её развитие. Сейчас есть всё необходимое для того, чтобы она работала на сотни тысяч людей — без того, чтобы вы были обязаны каждый день создавать новый контент. Это следующий естественный шаг: от передачи знаний — к созданию среды, где они становятся образом жизни." },
+          { type: "text", x: 687, y: 451, w: 526, h: 116, size: 12, weight: "regular", text: "Рынок ментального здоровья растёт на 17–20% в год. Системных продуктов для долгосрочной работы над собой почти нет. Окно для занятия этой ниши открыто — но не навсегда." },
+          { type: "text", x: 1347, y: 451, w: 526, h: 145, size: 12, weight: "regular", text: "1,5 миллиона человек уже читают ваши книги, проходят курсы и стараются измениться. Продукт даёт им то, чего они ждали: среду,\nв которой методология становится их реальный образом жизни." },
+
+          { type: "text", x: 46, y: 922, w: 1227, h: 100, size: 20, weight: "bold", text: "Этот продукт создаст для людей место, где ваша методология становится их жизнью 💙" }
+        ]
+      }
+    ];
+
+    // Слайд 07 в макете повторяет слайд 06 — клонируем узлы, сохраняя сетку.
+    SLIDES.find(s => s.id === "s7").nodes = JSON.parse(JSON.stringify(SLIDES.find(s => s.id === "s6").nodes));
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function el(tag, className, attrs = {}) {
+      const n = document.createElement(tag);
+      if (className) n.className = className;
+      for (const [k, v] of Object.entries(attrs)) {
+        if (v === undefined || v === null) continue;
+        if (k === "style") n.setAttribute("style", v);
+        else n.setAttribute(k, v);
+      }
+      return n;
+    }
+
+    function renderTextNode(node) {
+      const div = el("div", "node t" + (node.weight === "bold" ? " bold" : "") + (node.tone === "muted" ? " muted" : ""));
+      div.style.left = node.x + "px";
+      div.style.top = node.y + "px";
+      div.style.width = node.w + "px";
+      div.style.height = node.h + "px";
+      div.style.fontSize = (node.size || 24) + "px";
+      const s = Number(node.size || 24);
+      const lh =
+        node.lh ??
+        (s >= 60 ? 1.02 :
+         s >= 40 ? 1.08 :
+         s >= 26 ? 1.18 :
+         s >= 16 ? 1.32 :
+         1.45);
+      const ls =
+        node.ls ??
+        (s >= 60 ? -0.03 :
+         s >= 40 ? -0.025 :
+         s >= 26 ? -0.02 :
+         s >= 16 ? -0.012 :
+         -0.006);
+      div.style.setProperty("--lh", String(lh));
+      div.style.setProperty("--ls", `${ls}em`);
+
+      if (node.rich === "para" && Array.isArray(node.text)) {
+        const html = node.text.map(part => {
+          const safe = escapeHtml(part.text).replaceAll("\\n", "<br/>");
+          if (part.weight === "bold") return `<span style="font-weight: 800">${safe}</span>`;
+          return `<span>${safe}</span>`;
+        }).join("");
+        div.innerHTML = html;
+      } else {
+        div.innerHTML = escapeHtml(node.text || "").replaceAll("\\n", "<br/>");
+      }
+      return div;
+    }
+
+    function renderListNode(node) {
+      const wrap = el("div", "node");
+      wrap.style.left = node.x + "px";
+      wrap.style.top = node.y + "px";
+      wrap.style.width = node.w + "px";
+      wrap.style.height = node.h + "px";
+
+      const ul = el("ul", "t list");
+      const s = Number(node.size || 24);
+      ul.style.fontSize = s + "px";
+      ul.style.setProperty("--lh", String(node.lh ?? (s >= 20 ? 1.25 : 1.35)));
+      ul.style.setProperty("--ls", `${node.ls ?? (s >= 20 ? -0.012 : -0.006)}em`);
+      for (const it of (node.items || [])) {
+        const li = document.createElement("li");
+        li.textContent = it;
+        ul.appendChild(li);
+      }
+      wrap.appendChild(ul);
+      return wrap;
+    }
+
+    function renderShapeNode(node) {
+      const cls = node.type === "rect" ? "node rect" : "node ellipse";
+      const div = el("div", cls);
+      div.style.left = node.x + "px";
+      div.style.top = node.y + "px";
+      div.style.width = node.w + "px";
+      div.style.height = node.h + "px";
+      return div;
+    }
+
+    function renderImageNode(node) {
+      const wrap = el("div", "node img");
+      wrap.style.left = node.x + "px";
+      wrap.style.top = node.y + "px";
+      wrap.style.width = node.w + "px";
+      wrap.style.height = node.h + "px";
+      if (node.radius !== undefined) wrap.style.borderRadius = node.radius + "px";
+
+      const img = document.createElement("img");
+      img.alt = node.alt || "";
+      img.src = node.src;
+      img.loading = "lazy";
+      wrap.appendChild(img);
+      return wrap;
+    }
+
+    function renderSlide(slide, index) {
+      const section = el("section", "slide", { id: slide.id });
+      section.appendChild(el("div", "badge", { "aria-hidden": "true" })).textContent = slide.label;
+
+      const stage = el("div", "stage");
+      section.appendChild(stage);
+
+      const artboard = el("div", "artboard");
+      stage.appendChild(artboard);
+
+      for (const node of slide.nodes) {
+        if (node.type === "text") artboard.appendChild(renderTextNode(node));
+        else if (node.type === "list") artboard.appendChild(renderListNode(node));
+        else if (node.type === "rect" || node.type === "ellipse") artboard.appendChild(renderShapeNode(node));
+        else if (node.type === "image") artboard.appendChild(renderImageNode(node));
+      }
+
+      // Кнопки/действия на слайде (не влияют на сетку)
+      if (Array.isArray(slide.actions) && slide.actions.length) {
+        slide.actions.forEach((a, i) => {
+          const link = el("a", "pill", { href: a.href, target: "_blank", rel: "noopener noreferrer" });
+          link.textContent = a.label;
+          link.style.position = "absolute";
+          link.style.right = "16px";
+          link.style.bottom = (16 + i * 44) + "px";
+          link.style.zIndex = "10";
+          section.appendChild(link);
+        });
+      }
+
+      // scale artboard to stage width
+      const ro = new ResizeObserver(() => {
+        const rect = stage.getBoundingClientRect();
+        const scale = rect.width / 1920;
+        artboard.style.transform = `scale(${scale})`;
+        stage.style.height = (1080 * scale) + "px";
+      });
+      ro.observe(stage);
+
+      return section;
+    }
+
+    function render() {
+      const slidesRoot = document.getElementById("slides");
+      const jumpRoot = document.getElementById("jump");
+
+      slidesRoot.innerHTML = "";
+      jumpRoot.innerHTML = "";
+
+      SLIDES.forEach((s, idx) => {
+        const num = String(idx + 1).padStart(2, "0");
+        const a = el("a", "pill", { href: `#${s.id}` });
+        a.textContent = num;
+        jumpRoot.appendChild(a);
+
+        slidesRoot.appendChild(renderSlide(s, idx));
+      });
+
+      const map = el("a", "pill", { href: "/sreda_map.html", target: "_blank", rel: "noopener noreferrer" });
+      map.textContent = "sreda_map ↗";
+      jumpRoot.appendChild(map);
+    }
+
+    render();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админка — Продукт</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f9f9;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --accent: #E8374A;
+    --accent-dim: rgba(232,55,74,0.08);
+    --text: #09090B;
+    --text2: #3F3F46;
+    --muted: #71717A;
+    --muted-light: #A1A1AA;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 20px; }
+
+  .back-link {
+    font-size: 13px; font-weight: 600;
+    color: var(--muted); text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  .topbar-title {
+    font-size: 15px; font-weight: 700; color: var(--text);
+  }
+
+  .topbar-sep { width: 1px; height: 20px; background: var(--border); }
+
+  .btn-save {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 20px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-save:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-save:active { transform: none; opacity: 1; }
+  .btn-save:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  .save-status {
+    font-size: 13px; font-weight: 500;
+    color: var(--muted-light);
+    transition: color 0.3s;
+  }
+  .save-status.ok { color: #22c55e; }
+  .save-status.err { color: var(--accent); }
+
+  /* ─── LAYOUT ─── */
+  .content { padding: 40px 40px 80px; max-width: 960px; }
+
+  /* ─── PHASE BLOCK ─── */
+  .phase-block { margin-bottom: 48px; }
+
+  .phase-heading {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .phase-tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px 12px;
+  }
+
+  /* ─── CARD EDITOR ─── */
+  .card-editor {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .card-editor:focus-within { border-color: rgba(232,55,74,0.3); }
+
+  .card-editor.type-key { border-color: rgba(232,55,74,0.25); background: rgba(232,55,74,0.02); }
+
+  .card-editor-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card-type-badge {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  .card-icon-display {
+    font-size: 20px; line-height: 1;
+  }
+
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted-light);
+    margin-bottom: 5px;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.5;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,55,74,0.10);
+    background: #fff;
+  }
+
+  .field textarea { min-height: 72px; }
+  .field textarea.tooltip-field { min-height: 96px; }
+
+  /* ─── INTRO EDITOR ─── */
+  .intro-block {
+    margin-bottom: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .intro-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .intro-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    padding: 14px;
+  }
+  .intro-item-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .intro-item-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.2px;
+  }
+  .intro-item-name span { font-size: 18px; line-height: 1; }
+  .pill {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-link" href="/sreda_map.html">← Карта</a>
+    <div class="topbar-sep"></div>
+    <div class="topbar-title">Редактор карточек</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="save-status" id="status"></span>
+    <button class="btn-save" id="btnSave" onclick="saveAll()">Сохранить</button>
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div style="color:var(--muted-light);font-size:14px;">Загрузка...</div>
+</div>
+
+<script>
+let data = null;
+
+const BLOCKS = [
+  { key: 'anchor', icon: '🎙️', title: 'Якорь' },
+  { key: 'people', icon: '👥', title: 'Люди' },
+  { key: 'practice', icon: '🔬', title: 'Практика' },
+  { key: 'memory', icon: '📈', title: 'Память' },
+];
+
+fetch('/cards.json')
+  .then(r => r.json())
+  .then(json => {
+    data = json;
+    render();
+  });
+
+function render() {
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  // Intro editor
+  content.appendChild(makeIntroEditor());
+  content.appendChild(makeMatrixHeadersEditor());
+
+  data.phases.forEach((phase, pi) => {
+    const block = document.createElement('div');
+    block.className = 'phase-block';
+
+    const heading = document.createElement('div');
+    heading.className = 'phase-heading';
+    heading.innerHTML = `<span class="phase-tag">${phase.label.replace('<br>', ' ')}</span>`;
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '＋ Добавить карточку';
+    addBtn.style.marginLeft = '12px';
+    addBtn.style.fontSize = '11px';
+    addBtn.style.padding = '5px 10px';
+    addBtn.style.borderRadius = '999px';
+    addBtn.style.border = '1px solid var(--border)';
+    addBtn.style.background = '#fff';
+    addBtn.style.cursor = 'pointer';
+    addBtn.onclick = () => {
+      addCardToPhase(pi);
+      render();
+    };
+    heading.appendChild(addBtn);
+    block.appendChild(heading);
+
+    phase.cards.forEach((card, ci) => {
+      block.appendChild(makeCardEditor(card, pi, ci));
+    });
+
+    content.appendChild(block);
+  });
+}
+
+function ensureIntroShape() {
+  if (!data.intro) data.intro = {};
+  if (!data.intro.sectionLabel) data.intro.sectionLabel = 'Из чего состоит продукт';
+  if (!data.intro.items) data.intro.items = {};
+  BLOCKS.forEach(b => {
+    if (!data.intro.items[b.key]) data.intro.items[b.key] = { title: b.title, hook: '', desc: '' };
+    if (typeof data.intro.items[b.key].title !== 'string') data.intro.items[b.key].title = b.title;
+    if (typeof data.intro.items[b.key].hook !== 'string') data.intro.items[b.key].hook = '';
+    if (typeof data.intro.items[b.key].desc !== 'string') data.intro.items[b.key].desc = '';
+  });
+}
+
+function ensureMatrixHeadersShape() {
+  if (!data.matrixHeaders) data.matrixHeaders = {};
+  BLOCKS.forEach(b => {
+    if (!data.matrixHeaders[b.key]) data.matrixHeaders[b.key] = { title: b.title, sub: '' };
+    if (typeof data.matrixHeaders[b.key].title !== 'string') data.matrixHeaders[b.key].title = b.title;
+    if (typeof data.matrixHeaders[b.key].sub !== 'string') data.matrixHeaders[b.key].sub = '';
+  });
+}
+
+function makeIntroEditor() {
+  ensureIntroShape();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'intro-block';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'intro-title';
+  hdr.innerHTML = `<span>Вводный блок</span><span class="pill">Редактируемый</span>`;
+  wrap.appendChild(hdr);
+
+  wrap.appendChild(makeField('Заголовок секции', 'input', data.intro.sectionLabel, val => { data.intro.sectionLabel = val; }));
+
+  const grid = document.createElement('div');
+  grid.className = 'intro-grid';
+
+  BLOCKS.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'intro-item';
+
+    const itemHdr = document.createElement('div');
+    itemHdr.className = 'intro-item-hdr';
+    itemHdr.innerHTML = `
+      <div class="intro-item-name"><span>${b.icon}</span>${b.title}</div>
+      <div class="pill">${b.key}</div>
+    `;
+    item.appendChild(itemHdr);
+
+    item.appendChild(makeField('Название блока', 'input', data.intro.items[b.key].title, val => { data.intro.items[b.key].title = val; }));
+    item.appendChild(makeField('Хук (курсивная строка)', 'input', data.intro.items[b.key].hook, val => { data.intro.items[b.key].hook = val; }));
+    item.appendChild(makeField('Описание', 'textarea', data.intro.items[b.key].desc, val => { data.intro.items[b.key].desc = val; }));
+
+    grid.appendChild(item);
+  });
+
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function makeMatrixHeadersEditor() {
+  ensureMatrixHeadersShape();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'intro-block';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'intro-title';
+  hdr.innerHTML = `<span>Шапка таблицы (матрицы)</span><span class="pill">Редактируемая</span>`;
+  wrap.appendChild(hdr);
+
+  const grid = document.createElement('div');
+  grid.className = 'intro-grid';
+
+  BLOCKS.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'intro-item';
+
+    const itemHdr = document.createElement('div');
+    itemHdr.className = 'intro-item-hdr';
+    itemHdr.innerHTML = `
+      <div class="intro-item-name"><span>${b.icon}</span>${b.title}</div>
+      <div class="pill">${b.key}</div>
+    `;
+    item.appendChild(itemHdr);
+
+    item.appendChild(makeField('Название секции', 'input', data.matrixHeaders[b.key].title, val => { data.matrixHeaders[b.key].title = val; }));
+    item.appendChild(makeField('Подназвание секции', 'input', data.matrixHeaders[b.key].sub, val => { data.matrixHeaders[b.key].sub = val; }));
+
+    grid.appendChild(item);
+  });
+
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function makeCardEditor(card, pi, ci) {
+  const div = document.createElement('div');
+  div.className = 'card-editor' + (card.type === 'key' ? ' type-key' : '');
+
+  const header = document.createElement('div');
+  header.className = 'card-editor-header';
+  header.innerHTML = `
+    <span class="card-icon-display">${card.icon}</span>
+    ${card.type === 'key' ? '<span class="card-type-badge">Ключевая фича</span>' : ''}
+    ${card.type === 'moment' ? '<span class="card-type-badge" style="color:var(--muted);background:rgba(0,0,0,0.05)">Момент</span>' : ''}
+  `;
+  div.appendChild(header);
+
+  div.appendChild(makeSelectField(
+    'Секция (строка таблицы)',
+    data.phases.map((p, idx) => ({ value: String(idx), label: (p.label || '').replace('<br>', ' ') })),
+    String(pi),
+    val => {
+      const toPi = parseInt(val, 10);
+      if (!Number.isFinite(toPi) || toPi === pi) return;
+      moveCard(pi, ci, toPi);
+      render();
+    }
+  ));
+
+  div.appendChild(makeSelectField(
+    'Тип карточки',
+    [
+      { value: '', label: 'Обычная' },
+      { value: 'key', label: 'Ключевая фича' }
+    ],
+    card.type === 'key' ? 'key' : '',
+    val => {
+      data.phases[pi].cards[ci].type = val;
+      render();
+    }
+  ));
+
+  div.appendChild(makeNumberField(
+    'Приоритет в колонке (меньше = выше)',
+    Number.isFinite(card.order) ? card.order : 0,
+    val => { data.phases[pi].cards[ci].order = val; }
+  ));
+
+  div.appendChild(makeSelectField(
+    'Колонка в матрице',
+    [
+      { value: 'anchor', label: 'Якорь' },
+      { value: 'people', label: 'Люди' },
+      { value: 'practice', label: 'Практика' },
+      { value: 'memory', label: 'Память' }
+    ],
+    card.block || 'practice',
+    val => { data.phases[pi].cards[ci].block = val; }
+  ));
+  div.appendChild(makeField('Название', 'input', card.name, val => { data.phases[pi].cards[ci].name = val; }));
+  div.appendChild(makeField('Описание', 'textarea', card.desc, val => { data.phases[pi].cards[ci].desc = val; }));
+  div.appendChild(makeField('Тултип (подсказка при наведении)', 'textarea', card.tooltip, val => { data.phases[pi].cards[ci].tooltip = val; }, 'tooltip-field'));
+
+  return div;
+}
+
+function moveCard(fromPi, fromCi, toPi) {
+  if (!data || !data.phases) return;
+  if (!data.phases[fromPi] || !Array.isArray(data.phases[fromPi].cards)) return;
+  if (!data.phases[toPi] || !Array.isArray(data.phases[toPi].cards)) return;
+  const list = data.phases[fromPi].cards;
+  const [card] = list.splice(fromCi, 1);
+  if (!card) return;
+  data.phases[toPi].cards.push(card);
+}
+
+function addCardToPhase(pi) {
+  if (!data || !data.phases || !data.phases[pi]) return;
+  if (!Array.isArray(data.phases[pi].cards)) data.phases[pi].cards = [];
+  data.phases[pi].cards.push({
+    type: '',
+    block: 'practice',
+    icon: '⭐️',
+    name: 'Новая карточка',
+    desc: '',
+    tooltip: '',
+    order: 0
+  });
+}
+
+function makeField(label, tag, value, onChange, extraClass = '') {
+  const wrap = document.createElement('div');
+  wrap.className = 'field';
+
+  const lbl = document.createElement('label');
+  lbl.textContent = label;
+  wrap.appendChild(lbl);
+
+  const el = document.createElement(tag);
+  el.value = value;
+  if (extraClass) el.className = extraClass;
+  el.addEventListener('input', e => onChange(e.target.value));
+  wrap.appendChild(el);
+
+  return wrap;
+}
+
+function makeNumberField(label, value, onChange) {
+  const wrap = document.createElement('div');
+  wrap.className = 'field';
+
+  const lbl = document.createElement('label');
+  lbl.textContent = label;
+  wrap.appendChild(lbl);
+
+  const el = document.createElement('input');
+  el.type = 'number';
+  el.value = String(value ?? 0);
+  el.addEventListener('input', e => {
+    const n = parseInt(e.target.value, 10);
+    onChange(Number.isFinite(n) ? n : 0);
+  });
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function makeSelectField(label, options, value, onChange) {
+  const wrap = document.createElement('div');
+  wrap.className = 'field';
+
+  const lbl = document.createElement('label');
+  lbl.textContent = label;
+  wrap.appendChild(lbl);
+
+  const el = document.createElement('select');
+  el.style.width = '100%';
+  el.style.fontFamily = "'Manrope', sans-serif";
+  el.style.fontSize = '14px';
+  el.style.fontWeight = '600';
+  el.style.color = 'var(--text)';
+  el.style.background = 'var(--bg)';
+  el.style.border = '1px solid var(--border)';
+  el.style.borderRadius = '8px';
+  el.style.padding = '10px 14px';
+  el.style.transition = 'border-color 0.2s, box-shadow 0.2s';
+
+  options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    el.appendChild(o);
+  });
+
+  el.value = value;
+  el.addEventListener('change', e => onChange(e.target.value));
+  el.addEventListener('focus', () => {
+    el.style.borderColor = 'var(--accent)';
+    el.style.boxShadow = '0 0 0 3px rgba(232,55,74,0.10)';
+    el.style.background = '#fff';
+  });
+  el.addEventListener('blur', () => {
+    el.style.borderColor = 'var(--border)';
+    el.style.boxShadow = 'none';
+    el.style.background = 'var(--bg)';
+  });
+
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function saveAll() {
+  const btn = document.getElementById('btnSave');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.className = 'save-status';
+  status.textContent = 'Сохраняю...';
+
+  fetch('/api/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.ok) {
+      status.textContent = 'Сохранено ✓';
+      status.className = 'save-status ok';
+    } else {
+      throw new Error(res.error || 'ошибка');
+    }
+  })
+  .catch(err => {
+    status.textContent = 'Ошибка: ' + err.message;
+    status.className = 'save-status err';
+  })
+  .finally(() => {
+    btn.disabled = false;
+    setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 3000);
+  });
+}
+</script>
+</body>
+</html>

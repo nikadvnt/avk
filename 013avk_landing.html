@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>АВК — презентация</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root{
+      /* UI-токены как в `sreda_map.html` */
+      --bg: #f9f9f9;
+      --surface: #ffffff;
+      --border: #e4e4e7;
+      --accent: #E8374A;
+      --text: #09090B;
+      --text2: #3F3F46;
+      --muted: #71717A;
+      --muted-light: #A1A1AA;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    html { scroll-behavior: smooth; }
+    body{
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding: 22px 16px 56px;
+      overflow-x: hidden;
+    }
+
+    /* Увеличиваем общий размер слайдов на десктопе */
+    .wrap{ max-width: 1680px; margin: 0 auto; }
+
+    /* На очень широких экранах уменьшаем поля, чтобы слайды выглядели крупнее */
+    @media (min-width: 1600px){
+      body{ padding-left: 10px; padding-right: 10px; }
+    }
+
+    .topbar{
+      position: sticky;
+      top: 12px;
+      z-index: 50;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin: 0 auto 18px;
+    }
+    .crumb{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .crumb a{
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .crumb a:hover{ color: var(--text2); border-color: rgba(232,55,74,0.35); }
+
+    .jump{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(9,9,11,0.02);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+    .pill:hover{
+      transform: translateY(-1px);
+      background: rgba(232,55,74,0.06);
+      border-color: rgba(232,55,74,0.35);
+      color: var(--text2);
+    }
+
+    .slides{
+      display:flex;
+      flex-direction: column;
+      gap: 118px;
+      /* Послайдовый скролл */
+      scroll-snap-type: y mandatory;
+      scroll-padding-top: 74px; /* sticky topbar + небольшой зазор */
+    }
+
+    .slide{
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: var(--surface);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      scroll-margin-top: 74px; /* чтобы не уезжало под topbar */
+    }
+    .slide:hover{ box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+    .slide img{
+      display:block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Clickable overlay on slide 9 (Карта продукта) without changing grid */
+    .slide .map-link{
+      position:absolute;
+      right: 14px;
+      bottom: 14px;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(232,55,74,0.35);
+      color: var(--text2);
+      text-decoration:none;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+    .slide .map-link:hover{
+      transform: translateY(-2px);
+      background: rgba(232,55,74,0.06);
+      border-color: rgba(232,55,74,0.45);
+      color: var(--text);
+    }
+
+    .slide .badge{
+      position:absolute;
+      left: 12px;
+      top: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 720px){
+      .jump{ display:none; }
+      .topbar{ border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="crumb">
+        <span style="width:7px;height:7px;border-radius:999px;background:var(--accent);display:inline-block;flex:0 0 auto;"></span>
+        <span style="opacity:.9;">Презентация</span>
+        <span style="opacity:.45;">•</span>
+        <a href="/index.html">главная</a>
+      </div>
+      <div class="jump" aria-label="Переход к слайдам">
+        <a class="pill" href="#s1">01</a>
+        <a class="pill" href="#s2">02</a>
+        <a class="pill" href="#s3">03</a>
+        <a class="pill" href="#s4">04</a>
+        <a class="pill" href="#s5">05</a>
+        <a class="pill" href="#s6">06</a>
+        <a class="pill" href="#s7">07</a>
+        <a class="pill" href="#s8">08</a>
+        <a class="pill" href="#s9">09</a>
+        <a class="pill" href="#s10">10</a>
+        <a class="pill" href="#s11">11</a>
+        <a class="pill" href="#s12">12</a>
+        <a class="pill" href="/sreda_map.html" target="_blank" rel="noopener noreferrer">sreda_map ↗</a>
+      </div>
+    </div>
+
+    <main class="slides" aria-label="Слайды презентации">
+      <section class="slide" id="s1">
+        <div class="badge">Слайд 01</div>
+        <img src="/slides/slide-01.png" alt="Слайд 01" loading="eager" />
+      </section>
+      <section class="slide" id="s2">
+        <div class="badge">Слайд 02</div>
+        <img src="/slides/slide-02.png" alt="Слайд 02" loading="lazy" />
+      </section>
+      <section class="slide" id="s3">
+        <div class="badge">Слайд 03</div>
+        <img src="/slides/slide-03.png" alt="Слайд 03" loading="lazy" />
+      </section>
+      <section class="slide" id="s4">
+        <div class="badge">Слайд 04</div>
+        <img src="/slides/slide-04.png" alt="Слайд 04" loading="lazy" />
+      </section>
+      <section class="slide" id="s5">
+        <div class="badge">Слайд 05</div>
+        <img src="/slides/slide-05.png" alt="Слайд 05" loading="lazy" />
+      </section>
+      <section class="slide" id="s6">
+        <div class="badge">Слайд 06</div>
+        <img src="/slides/slide-06.png" alt="Слайд 06" loading="lazy" />
+      </section>
+      <section class="slide" id="s7">
+        <div class="badge">Слайд 07</div>
+        <img src="/slides/slide-07.png" alt="Слайд 07" loading="lazy" />
+      </section>
+      <section class="slide" id="s8">
+        <div class="badge">Слайд 08</div>
+        <img src="/slides/slide-08.png" alt="Слайд 08" loading="lazy" />
+      </section>
+      <section class="slide" id="s9">
+        <div class="badge">Слайд 09</div>
+        <img src="/slides/slide-09.png" alt="Слайд 09" loading="lazy" />
+        <a class="map-link" href="/sreda_map.html" target="_blank" rel="noopener noreferrer">Открыть карту продукта ↗</a>
+      </section>
+      <section class="slide" id="s10">
+        <div class="badge">Слайд 10</div>
+        <img src="/slides/slide-10.png" alt="Слайд 10" loading="lazy" />
+      </section>
+      <section class="slide" id="s11">
+        <div class="badge">Слайд 11</div>
+        <img src="/slides/slide-11.png" alt="Слайд 11" loading="lazy" />
+      </section>
+      <section class="slide" id="s12">
+        <div class="badge">Слайд 12</div>
+        <img src="/slides/slide-12.png" alt="Слайд 12" loading="lazy" />
+      </section>
+    </main>
+  </div>
+</body>
+</html>
+

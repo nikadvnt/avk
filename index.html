@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVK — старт</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f9f9;
+      --surface: #ffffff;
+      --border: #e4e4e7;
+      --accent: #E8374A;
+      --text: #09090B;
+      --text2: #3F3F46;
+      --muted: #71717A;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+      --shadow-key: 0 10px 34px rgba(232,55,74,0.14), 0 1px 8px rgba(232,55,74,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: radial-gradient(1200px 520px at 50% -120px, rgba(232,55,74,0.08), transparent 60%),
+                  radial-gradient(980px 460px at 10% 0%, rgba(9,9,11,0.035), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      padding: 72px 40px 96px;
+    }
+
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .hero {
+      padding: 44px 44px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before{
+      content:'';
+      position:absolute;
+      inset:-1px;
+      background:
+        radial-gradient(700px 280px at 20% 10%, rgba(232,55,74,0.13), transparent 60%),
+        radial-gradient(640px 240px at 90% 30%, rgba(9,9,11,0.06), transparent 58%);
+      pointer-events:none;
+      z-index:0;
+    }
+    .hero > * { position: relative; z-index: 1; }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .kicker .dot{
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(232,55,74,0.12);
+    }
+
+    h1 {
+      font-family: 'Manrope', -apple-system, system-ui, sans-serif;
+      font-size: clamp(34px, 4.6vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -1.2px;
+      margin-bottom: 14px;
+    }
+    .lead {
+      font-size: 15.5px;
+      line-height: 1.85;
+      color: var(--text2);
+      max-width: 78ch;
+    }
+
+    .grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+    }
+
+    .card{
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.85);
+      box-shadow: var(--shadow);
+      padding: 18px 18px;
+    }
+
+    .btns{ display:flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(232,55,74,0.30);
+      background: linear-gradient(180deg, rgba(232,55,74,0.16), rgba(232,55,74,0.08));
+      color: var(--text);
+      font-weight: 750;
+      text-decoration: none;
+      box-shadow: var(--shadow-key);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow: 0 18px 54px rgba(232,55,74,0.22), 0 3px 12px rgba(232,55,74,0.12); }
+    .btn.secondary{
+      background: #fff;
+      border-color: var(--border);
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .btn.secondary:hover{ color: var(--text2); box-shadow: var(--shadow-hover); }
+
+    .meta{
+      margin-top: 10px;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+      background: rgba(9,9,11,0.05);
+      border: 1px solid rgba(9,9,11,0.08);
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: var(--text2);
+    }
+
+    @media (max-width: 860px){
+      body{ padding: 44px 20px 72px; }
+      .hero{ padding: 28px 20px; border-radius: 22px; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="kicker"><span class="dot"></span>localhost 3002</div>
+      <h1>Стартовая страница проекта</h1>
+      <div class="lead">
+        Открывайте материалы прямо отсюда. Сервер раздаёт файлы из папки проекта, поэтому ссылки ниже работают на <code>/</code>.
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div style="font-weight:800; letter-spacing:2px; text-transform:uppercase; font-size:11px; color:var(--muted);">Лендинг</div>
+          <div style="margin-top:10px; font-size:14px; line-height:1.8; color:var(--text2);">
+            Лендинг собран из презентации (12 секций), с типографикой и удобным чтением.
+          </div>
+          <div class="btns">
+            <a class="btn" href="/013avk_landing.html">Открыть лендинг</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:800; letter-spacing:2px; text-transform:uppercase; font-size:11px; color:var(--muted);">Карта продукта</div>
+          <div style="margin-top:10px; font-size:14px; line-height:1.8; color:var(--text2);">
+            Интерактивная карта продукта (страница <code>sreda_map.html</code>).
+          </div>
+          <div class="btns">
+            <a class="btn secondary" href="/sreda_map.html">Открыть карту</a>
+            <a class="btn secondary" href="/admin.html">Открыть admin</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta">
+        Прямые ссылки: <code>http://localhost:3002/013avk_landing.html</code> и <code>http://localhost:3002/sreda_map.html</code>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
+

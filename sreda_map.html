@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Продукт — карта участника</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f9f9;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --accent: #E8374A;
+    --text: #09090B;
+    --text2: #3F3F46;
+    --muted: #71717A;
+    --muted-light: #A1A1AA;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-key: 0 4px 24px rgba(232,55,74,0.14), 0 1px 6px rgba(232,55,74,0.08);
+    --shadow-hover: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 80px 40px 100px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 100%; margin: 0 auto; position: relative; }
+
+  /* ─── HEADER ─── */
+  .header {
+    text-align: center;
+    margin-bottom: 96px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: clamp(80px, 12vw, 136px);
+    font-weight: 900;
+    letter-spacing: -4px;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .logo span { color: inherit; }
+
+  .tagline {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 32px;
+  }
+
+  .manifesto {
+    display: inline-block;
+    font-size: clamp(15px, 1.6vw, 17px);
+    font-weight: 400;
+    color: var(--text2);
+    line-height: 1.8;
+    max-width: 540px;
+    padding: 24px 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .manifesto strong { color: var(--text); font-weight: 700; }
+
+  /* ─── INTRO BLOCKS ─── */
+  .intro {
+    margin: -32px auto 72px;
+    max-width: 100%;
+    padding: 0;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 18px;
+  }
+  .section-label::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+    background: var(--border);
+  }
+  .intro-frame {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .intro-scroller {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+  .intro-grid {
+    min-width: 1040px;
+    display: grid;
+    grid-template-columns: 152px repeat(4, minmax(220px, 1fr));
+    gap: 0;
+  }
+  .intro-spacer {
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+  }
+  .intro-card {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 18px;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 440px;
+  }
+  .intro-card:last-child { border-right: none; }
+  .intro-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); z-index: 5; position: relative; }
+  .intro-num {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted-light);
+    margin-bottom: 10px;
+  }
+  .intro-icon { font-size: 22px; line-height: 1; margin-bottom: 10px; opacity: 0.75; }
+  .intro-title {
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .intro-hook {
+    font-size: 12px;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--text2);
+    margin-bottom: 10px;
+    line-height: 1.5;
+    min-height: 36px; /* 2 lines to align desc */
+  }
+  .intro-desc {
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 400;
+    margin-top: 0;
+  }
+
+  /* ─── TIMELINE ─── */
+  .phases { display: flex; flex-direction: column; position: relative; }
+  .phases { margin-top: 200px; }
+
+  .phases::before {
+    content: '';
+    position: absolute;
+    left: 152px; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+    pointer-events: none;
+  }
+
+  .phase { position: relative; animation: fadeUp 0.5s ease both; }
+  .phase:nth-child(1)  { animation-delay: 0.05s; }
+  .phase:nth-child(3)  { animation-delay: 0.10s; }
+  .phase:nth-child(5)  { animation-delay: 0.15s; }
+  .phase:nth-child(7)  { animation-delay: 0.20s; }
+  .phase:nth-child(9)  { animation-delay: 0.25s; }
+  .phase:nth-child(11) { animation-delay: 0.30s; }
+  .phase:nth-child(13) { animation-delay: 0.35s; }
+  .phase:nth-child(15) { animation-delay: 0.40s; }
+
+  .phase-row {
+    display: grid;
+    grid-template-columns: 152px 1fr;
+    gap: 0 48px;
+    padding: 14px 0;
+  }
+
+  .phase-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 48px;
+    padding-top: 8px;
+    position: relative;
+  }
+
+  .phase-label::after {
+    content: '';
+    position: absolute;
+    right: -8px; top: 16px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+  }
+
+  .phase-when {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .phase-num {
+    font-size: 10px;
+    color: var(--muted-light);
+    text-align: right;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ─── MATRIX ─── */
+  .matrix-wrap { padding-bottom: 6px; }
+
+  .matrix-frame {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .matrix-stickybar {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    overflow: visible;
+  }
+
+  .matrix-hdr-scroller { overflow: hidden; }
+
+  .matrix-shell { border-radius: 0 0 18px 18px; }
+
+  .matrix-scroller {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .matrix {
+    min-width: 1040px;
+    display: grid;
+    grid-template-columns: 152px repeat(4, minmax(220px, 1fr));
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+    box-shadow: none;
+  }
+  .m-hdr {
+    padding: 16px 16px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    background: #fff;
+    position: relative;
+    text-align: center;
+  }
+  .m-hdr:last-child { border-right: none; }
+  .m-hdr.corner { background: var(--bg); }
+  .m-hdr-icon { display: block; font-size: 18px; margin-bottom: 6px; opacity: 0.85; }
+  .m-hdr-title {
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--text);
+    display: block;
+  }
+  .m-hdr-sub {
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+
+  .m-row-label {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding: 14px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 18px;
+  }
+  .m-row-label.last { border-bottom: none; }
+  .m-row-text {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.45;
+  }
+  .m-row-note { margin-top: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted-light); }
+
+  .m-cell {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+    min-height: 84px;
+  }
+  .m-cell:last-child { border-right: none; }
+  .m-cell.last { border-bottom: none; }
+
+  /* cards inside matrix */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    position: relative;
+    overflow: visible;
+    box-shadow: var(--shadow);
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); z-index: 120; }
+
+  .card-icon { font-size: 24px; margin-bottom: 12px; display: block; line-height: 1; opacity: 0.5; }
+  .card-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.4; margin-bottom: 8px; }
+  .card-desc { font-size: 13px; color: var(--text2); line-height: 1.65; font-weight: 500; }
+
+  .card.key {
+    border: 1.5px solid var(--accent);
+    box-shadow: var(--shadow-key);
+    grid-column: span 2;
+    padding: 28px 26px;
+  }
+  .card.key:hover { box-shadow: 0 16px 48px rgba(232,55,74,0.18), 0 4px 12px rgba(232,55,74,0.10); }
+  .card.key .card-icon { opacity: 1; font-size: 28px; }
+  .card.key .card-name { font-size: 19px; font-weight: 700; color: var(--text); }
+  .card.key .card-desc { font-size: 14px; color: var(--text2); }
+
+  .key-label {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .card.moment { grid-column: auto; }
+
+  /* ─── DIVIDER ─── */
+  .phase-divider {
+    height: 1px; margin: 6px 0;
+    background: linear-gradient(90deg, transparent 152px, var(--border) 152px, var(--border) 55%, transparent);
+  }
+
+  /* ─── TOOLTIP ─── */
+  .tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px 20px;
+    border-radius: 12px;
+    width: 288px;
+    text-align: left;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    white-space: normal;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+  }
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-top-color: var(--text);
+  }
+  .card:hover .tooltip { display: block; }
+
+  /* ─── PORTAL TOOLTIP (Safari-safe) ─── */
+  body.use-portal-tooltips .card:hover .tooltip { display: none; }
+  body.disable-tooltips .tooltip { display: none !important; }
+  body.disable-tooltips .portal-tooltip { display: none !important; }
+  .portal-tooltip {
+    display: none;
+    position: fixed;
+    background: rgba(255, 245, 247, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.58;
+    padding: 44px 34px;
+    border-radius: 16px;
+    width: 480px;
+    text-align: left;
+    z-index: 9999;
+    pointer-events: none;
+    border: none;
+    box-shadow: 0 22px 70px rgba(0,0,0,0.16), 0 8px 24px rgba(0,0,0,0.10);
+    white-space: normal;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+  }
+
+  .portal-tooltip-content {
+    max-width: 390px;
+    margin: 0 auto;
+  }
+  .portal-tooltip::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    display: block;
+    opacity: 0;
+  }
+
+  .portal-tooltip.place-right::after {
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right-color: rgba(255, 245, 247, 0.96);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.08));
+    opacity: 1;
+  }
+  .portal-tooltip.place-left::after {
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left-color: rgba(255, 245, 247, 0.96);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.08));
+    opacity: 1;
+  }
+  .portal-tooltip.place-below::after {
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom-color: rgba(255, 245, 247, 0.96);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.08));
+    opacity: 1;
+  }
+  .portal-tooltip.place-above::after {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top-color: rgba(255, 245, 247, 0.96);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.08));
+    opacity: 1;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    margin-top: 80px; padding-top: 40px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 24px;
+  }
+  .footer-phrase {
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-size: clamp(20px, 2.5vw, 26px);
+    font-style: italic; color: var(--muted);
+    max-width: 480px; line-height: 1.5;
+  }
+  .footer-phrase span { color: var(--accent); font-style: normal; font-weight: 700; }
+  .freq-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 6px 14px;
+    border-radius: 100px; background: var(--surface);
+    border: 1px solid var(--border); color: var(--muted);
+  }
+
+  /* ─── ADMIN LINK ─── */
+  .admin-link {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 16px;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: color 0.2s, border-color 0.2s;
+    z-index: 100;
+  }
+  .admin-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    body { padding: 44px 20px 72px; }
+    .phases::before { left: 96px; }
+    .phase-row { grid-template-columns: 96px 1fr; gap: 0 24px; }
+    .phase-label { padding-right: 24px; }
+    .phase-label::after { right: -7px; }
+    .phase-divider { background: linear-gradient(90deg, transparent 96px, var(--border) 96px, var(--border) 55%, transparent); }
+    .intro { margin: -18px auto 56px; }
+    .intro-grid { grid-template-columns: 96px repeat(4, minmax(220px, 1fr)); }
+    .matrix { grid-template-columns: 96px repeat(4, minmax(220px, 1fr)); }
+    .matrix-stickybar { top: 0; }
+    .card.key, .card.moment { padding: 18px 16px; }
+    .tooltip { left: 0; transform: none; width: 250px; }
+    .logo { letter-spacing: -3px; }
+    .header { margin-bottom: 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">Путь участника</div>
+    <div class="logo">Про<span>дукт</span></div>
+    <div class="tagline">Среда регулярной перестройки мышления. Не знание меняет человека — среда.</div>
+  </div>
+
+  <div class="intro" id="intro"></div>
+
+  <div class="phases" id="phases">
+    <div class="matrix-wrap">
+      <div class="matrix-frame">
+        <div class="matrix-stickybar">
+          <div class="matrix-hdr-scroller" id="matrixHdrScroller">
+            <div class="matrix" id="matrixHdr"></div>
+          </div>
+        </div>
+        <div class="matrix-shell">
+          <div class="matrix-scroller" id="matrixScroller">
+            <div class="matrix" id="matrixBody"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-phrase">
+      Поведение меняет <span>среда</span> —<br>не воля, не знание.
+    </div>
+    <div class="freq-badges">
+      <div class="badge">Ежедневно</div>
+      <div class="badge">Каждую неделю</div>
+      <div class="badge">Раз в 2 недели</div>
+      <div class="badge">Раз в месяц</div>
+      <div class="badge">Раз в квартал</div>
+      <div class="badge">Раз в полгода</div>
+    </div>
+  </div>
+
+</div>
+
+<a class="admin-link" href="/admin.html">✏️ Редактировать</a>
+
+<div class="portal-tooltip" id="portalTooltip"></div>
+
+<script>
+const BLOCKS_BASE = [
+  { key: 'anchor',  num: 'Блок 01', icon: '🎙️', title: 'Якорь',   sub: 'Курпатов' },
+  { key: 'people',  num: 'Блок 02', icon: '👥', title: 'Люди',    sub: 'Группы' },
+  { key: 'practice',num: 'Блок 03', icon: '🔬', title: 'Практика',sub: 'Инструменты' },
+  { key: 'memory',  num: 'Блок 04', icon: '📈', title: 'Память',  sub: 'Архив' },
+];
+
+document.body.classList.add('use-portal-tooltips');
+document.body.classList.add('disable-tooltips');
+
+function renderCard(card) {
+  const div = document.createElement('div');
+  div.className = 'card' + (card.type ? ' ' + card.type : '');
+  div.innerHTML = `
+    ${card.type === 'key' ? '<div class="key-label">Ключевая фича</div>' : ''}
+    <span class="card-icon">${card.icon}</span>
+    <div class="card-name">${card.name}</div>
+    <div class="card-desc">${card.desc}</div>
+    <div class="tooltip">${card.tooltip}</div>
+  `;
+  return div;
+}
+
+function renderIntro(intro) {
+  const root = document.getElementById('intro');
+  if (!intro) return;
+
+  const items = intro.items || {};
+  const sectionLabel = intro.sectionLabel || 'Из чего состоит продукт';
+
+  const label = document.createElement('div');
+  label.className = 'section-label';
+  label.textContent = sectionLabel;
+
+  const frame = document.createElement('div');
+  frame.className = 'intro-frame';
+
+  const scroller = document.createElement('div');
+  scroller.className = 'intro-scroller';
+  scroller.id = 'introScroller';
+
+  const grid = document.createElement('div');
+  grid.className = 'intro-grid';
+
+  const spacer = document.createElement('div');
+  spacer.className = 'intro-spacer';
+  grid.appendChild(spacer);
+
+  BLOCKS_BASE.forEach(b => {
+    const it = items[b.key] || {};
+    const card = document.createElement('div');
+    card.className = 'intro-card';
+    card.innerHTML = `
+      <div class="intro-num">${b.num}</div>
+      <div class="intro-icon">${b.icon}</div>
+      <div class="intro-title">${it.title || b.title}</div>
+      <div class="intro-hook">${it.hook || ''}</div>
+      <div class="intro-desc">${it.desc || ''}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  scroller.appendChild(grid);
+  frame.appendChild(scroller);
+
+  root.appendChild(label);
+  root.appendChild(frame);
+}
+
+function setupPortalTooltips() {
+  const portal = document.getElementById('portalTooltip');
+  if (!portal) return;
+  if (document.body.classList.contains('disable-tooltips')) return;
+
+  function hide() {
+    portal.style.display = 'none';
+    portal.classList.remove('place-below', 'place-above', 'place-left', 'place-right');
+  }
+
+  function showForCard(cardEl) {
+    const inner = cardEl.querySelector('.tooltip');
+    if (!inner) return hide();
+    const html = inner.innerHTML.trim();
+    if (!html) return hide();
+
+    portal.innerHTML = `<div class="portal-tooltip-content">${html}</div>`;
+    portal.style.display = 'block';
+
+    // measure after display
+    const rect = cardEl.getBoundingClientRect();
+    const tipRect = portal.getBoundingClientRect();
+
+    const gap = 4;
+    const margin = 10;
+
+    const rightSpace = window.innerWidth - rect.right - gap - margin;
+    const leftSpace = rect.left - gap - margin;
+
+    // Prefer side placement
+    if (rightSpace >= tipRect.width) {
+      let top = rect.top + rect.height / 2 - tipRect.height / 2;
+      top = Math.max(margin, Math.min(top, window.innerHeight - tipRect.height - margin));
+      const left = rect.right + gap;
+      portal.style.top = `${Math.round(top)}px`;
+      portal.style.left = `${Math.round(left)}px`;
+      portal.classList.add('place-right');
+      return;
+    }
+
+    if (leftSpace >= tipRect.width) {
+      let top = rect.top + rect.height / 2 - tipRect.height / 2;
+      top = Math.max(margin, Math.min(top, window.innerHeight - tipRect.height - margin));
+      const left = rect.left - gap - tipRect.width;
+      portal.style.top = `${Math.round(top)}px`;
+      portal.style.left = `${Math.round(left)}px`;
+      portal.classList.add('place-left');
+      return;
+    }
+
+    // Fallback to vertical placement
+    const aboveTop = rect.top - tipRect.height - gap;
+    const belowTop = rect.bottom + gap;
+    const canAbove = aboveTop >= margin;
+    const canBelow = belowTop + tipRect.height <= window.innerHeight - margin;
+
+    let top = canAbove ? aboveTop : belowTop;
+    let placement = canAbove ? 'place-above' : 'place-below';
+    if (!canAbove && !canBelow) {
+      top = Math.max(margin, Math.min(aboveTop, window.innerHeight - tipRect.height - margin));
+      placement = 'place-above';
+    }
+
+    let left = rect.left + rect.width / 2 - tipRect.width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tipRect.width - margin));
+
+    portal.style.top = `${Math.round(top)}px`;
+    portal.style.left = `${Math.round(left)}px`;
+    portal.classList.add(placement);
+  }
+
+  document.querySelectorAll('.card').forEach(cardEl => {
+    cardEl.addEventListener('mouseenter', () => showForCard(cardEl));
+    cardEl.addEventListener('mousemove', () => showForCard(cardEl));
+    cardEl.addEventListener('mouseleave', hide);
+  });
+
+  window.addEventListener('scroll', hide, { passive: true });
+  window.addEventListener('resize', hide);
+}
+
+fetch('/cards.json')
+  .then(r => r.json())
+  .then(data => {
+    renderIntro(data.intro);
+
+    const matrixHeaders = data.matrixHeaders || {};
+    const BLOCKS = BLOCKS_BASE.map(b => {
+      const hdr = matrixHeaders[b.key] || {};
+      return {
+        ...b,
+        title: hdr.title || b.title,
+        sub: hdr.sub || b.sub
+      };
+    });
+
+    const matrixHdr = document.getElementById('matrixHdr');
+    const matrixBody = document.getElementById('matrixBody');
+    const matrixScroller = document.getElementById('matrixScroller');
+    const matrixHdrScroller = document.getElementById('matrixHdrScroller');
+    matrixHdr.innerHTML = '';
+    matrixBody.innerHTML = '';
+
+    // header row
+    const corner = document.createElement('div');
+    corner.className = 'm-hdr corner';
+    matrixHdr.appendChild(corner);
+
+    BLOCKS.forEach(b => {
+      const hdr = document.createElement('div');
+      hdr.className = 'm-hdr';
+      hdr.innerHTML = `
+        <span class="m-hdr-icon">${b.icon}</span>
+        <span class="m-hdr-title">${b.title}</span>
+        <span class="m-hdr-sub">${b.sub}</span>
+      `;
+      matrixHdr.appendChild(hdr);
+    });
+
+    // body rows
+    (data.phases || []).forEach((phase, i) => {
+      const isLast = i === (data.phases.length - 1);
+
+      const rowLabel = document.createElement('div');
+      rowLabel.className = 'm-row-label' + (isLast ? ' last' : '');
+      rowLabel.innerHTML = `
+        <div>
+          <div class="m-row-text">${(phase.label || '').replace('<br>', '<br>')}</div>
+          ${phase.labelNote ? `<div class="m-row-note">${phase.labelNote}</div>` : ''}
+        </div>
+      `;
+      matrixBody.appendChild(rowLabel);
+
+      BLOCKS.forEach((b, bi) => {
+        const cell = document.createElement('div');
+        cell.className = 'm-cell' + (isLast ? ' last' : '');
+        if (bi === BLOCKS.length - 1) cell.className += ' last-col';
+
+        const cards = (phase.cards || [])
+          .filter(c => (c.block || '') === b.key)
+          .slice()
+          .sort((a, b) => {
+            const ao = Number.isFinite(a.order) ? a.order : 0;
+            const bo = Number.isFinite(b.order) ? b.order : 0;
+            if (ao !== bo) return ao - bo;
+            const an = (a.name || '').toString();
+            const bn = (b.name || '').toString();
+            return an.localeCompare(bn, 'ru');
+          });
+        cards.forEach(c => cell.appendChild(renderCard(c)));
+
+        matrixBody.appendChild(cell);
+      });
+    });
+
+    // Safari-safe sticky header: sync horizontal scroll
+    matrixScroller.addEventListener('scroll', () => {
+      matrixHdrScroller.scrollLeft = matrixScroller.scrollLeft;
+    }, { passive: true });
+
+    // keep intro columns aligned with table on horizontal scroll
+    const introScroller = document.getElementById('introScroller');
+    if (introScroller) {
+      let syncing = false;
+      const sync = (from, to) => {
+        if (syncing) return;
+        syncing = true;
+        to.scrollLeft = from.scrollLeft;
+        syncing = false;
+      };
+      matrixScroller.addEventListener('scroll', () => sync(matrixScroller, introScroller), { passive: true });
+      introScroller.addEventListener('scroll', () => sync(introScroller, matrixScroller), { passive: true });
+      // initial align
+      introScroller.scrollLeft = matrixScroller.scrollLeft;
+    }
+
+    setupPortalTooltips();
+  });
+</script>
+</body>
+</html>

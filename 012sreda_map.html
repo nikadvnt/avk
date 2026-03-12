@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СРЕДА — карта участника</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Manrope:wght@300;400;500;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e;
+    --red: #c8293a; --red-dim: #8a1c26;
+    --blue: #3b7fd4; --green: #3da464; --gold: #c9a84c;
+    --text: #e8e8f0; --muted: #6b6b85;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh; padding: 48px 24px 80px; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 64px; }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(56px, 8vw, 96px); font-weight: 900;
+    letter-spacing: -2px; line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, #c9a84c 60%, #c8293a 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 12px;
+  }
+  .sub { font-size: 13px; font-weight: 500; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); }
+  .tagline { margin-top: 16px; font-size: 16px; color: #9090aa; font-weight: 300; font-style: italic; }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 28px; display: flex; align-items: center; gap: 16px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* FOUR BLOCKS */
+  .blocks { margin-bottom: 72px; }
+  .blocks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .block-card {
+    border-radius: 12px; padding: 24px 20px; border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .block-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .block-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .block-card.b1 { background: linear-gradient(160deg, #1a0a0d, #0f0a10); }
+  .block-card.b1::before { background: var(--red); }
+  .block-card.b2 { background: linear-gradient(160deg, #0a0f1a, #0a0c14); }
+  .block-card.b2::before { background: var(--blue); }
+  .block-card.b3 { background: linear-gradient(160deg, #0a150d, #090d10); }
+  .block-card.b3::before { background: var(--green); }
+  .block-card.b4 { background: linear-gradient(160deg, #140f03, #0d0d0a); }
+  .block-card.b4::before { background: var(--gold); }
+  .block-num { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .b1 .block-num { color: var(--red); } .b2 .block-num { color: var(--blue); }
+  .b3 .block-num { color: var(--green); } .b4 .block-num { color: var(--gold); }
+  .block-icon { font-size: 26px; margin-bottom: 8px; display: block; }
+  .block-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .block-hook { font-size: 12px; font-weight: 600; margin-bottom: 10px; font-style: italic; }
+  .b1 .block-hook { color: #e87080; } .b2 .block-hook { color: #7ab0e8; }
+  .b3 .block-hook { color: #7ac48a; } .b4 .block-hook { color: var(--gold); }
+  .block-desc { font-size: 12px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+  /* MATRIX GRID */
+  .matrix-section { margin-bottom: 72px; }
+  .big-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(4, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* column headers */
+  .col-hdr {
+    padding: 16px 14px; text-align: center;
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .col-hdr:last-child { border-right: none; }
+  .col-hdr.corner { background: #0c0c14; }
+  .col-hdr.h1 { background: #130709; border-top: 3px solid var(--red); }
+  .col-hdr.h2 { background: #070a13; border-top: 3px solid var(--blue); }
+  .col-hdr.h3 { background: #070d09; border-top: 3px solid var(--green); }
+  .col-hdr.h4 { background: #0e0a02; border-top: 3px solid var(--gold); }
+  .hdr-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .hdr-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--text); display: block; }
+  .hdr-sub { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 3px; }
+  .h1 .hdr-sub { color: var(--red); } .h2 .hdr-sub { color: var(--blue); }
+  .h3 .hdr-sub { color: var(--green); } .h4 .hdr-sub { color: var(--gold); }
+
+  /* row label */
+  .row-lbl {
+    background: #0d0d16; border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 10px; display: flex; align-items: flex-start;
+    justify-content: flex-end; padding-top: 18px;
+  }
+  .row-lbl.last { border-bottom: none; }
+  .row-lbl-text {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--red); text-align: right; line-height: 1.5;
+  }
+
+  /* grid cell */
+  .gcell {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 10px; display: flex; flex-direction: column;
+    gap: 8px; min-height: 56px;
+  }
+  .gcell:last-child { border-right: none; }
+  .gcell.last { border-bottom: none; }
+
+  /* alternating row tints */
+  .r-even .row-lbl, .r-even .gcell { background: #0b0b13; }
+  .r-even .gcell.c1 { background: #0e0a0b; }
+  .r-even .gcell.c2 { background: #08090f; }
+  .r-even .gcell.c3 { background: #080c09; }
+  .r-even .gcell.c4 { background: #0c0a03; }
+  .r-odd  .row-lbl, .r-odd .gcell { background: #0a0a0f; }
+
+  /* mini card */
+  .mc {
+    background: var(--surface); border-radius: 8px; padding: 10px 12px;
+    border: 1px solid var(--border); position: relative;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    overflow: visible; cursor: default;
+  }
+  .mc:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.55); z-index: 30; }
+  .mc::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0;
+    width: 3px; border-radius: 8px 0 0 8px;
+  }
+  .mc.b1 { border-color: #2a1015; background: #120a0c; }
+  .mc.b1::before { background: var(--red); }
+  .mc.b1:hover { border-color: #3d1520; }
+  .mc.b2 { border-color: #101828; background: #0a0d18; }
+  .mc.b2::before { background: var(--blue); }
+  .mc.b2:hover { border-color: #18243a; }
+  .mc.b3 { border-color: #0f1e13; background: #090e0a; }
+  .mc.b3::before { background: var(--green); }
+  .mc.b3:hover { border-color: #162a1a; }
+  .mc.b4 { border-color: #241c08; background: #100d03; }
+  .mc.b4::before { background: var(--gold); }
+  .mc.b4:hover { border-color: #342a0e; }
+  .mc-icon { font-size: 14px; margin-bottom: 4px; display: block; }
+  .mc-name { font-size: 11.5px; font-weight: 600; color: var(--text); line-height: 1.35; margin-bottom: 3px; }
+  .mc-desc { font-size: 10.5px; color: var(--muted); line-height: 1.5; font-weight: 300; }
+
+  /* TOOLTIP */
+  .tip {
+    display: none; position: absolute;
+    bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: #17172a; border: 1px solid #2e2e50;
+    color: #c0c0d8; font-size: 11.5px; line-height: 1.6;
+    padding: 11px 14px; border-radius: 8px; width: 240px;
+    text-align: left; z-index: 200; pointer-events: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    font-family: 'Manrope', sans-serif; font-weight: 400;
+  }
+  .tip::after {
+    content: ''; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%); border: 5px solid transparent;
+    border-top-color: #2e2e50;
+  }
+  .mc:hover .tip { display: block; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 56px; padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 16px;
+  }
+  .footer-phrase {
+    font-family: 'Playfair Display', serif; font-size: 18px;
+    font-style: italic; color: #5a5a75; max-width: 480px; line-height: 1.5;
+  }
+  .footer-phrase span { color: var(--red); font-style: normal; }
+  .freq-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 5px 10px;
+    border-radius: 20px; border: 1px solid var(--border); color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .blocks-grid { grid-template-columns: 1fr 1fr; }
+    .big-grid { grid-template-columns: 64px repeat(4, 1fr); }
+    .mc-desc { display: none; }
+    .mc-name { font-size: 10px; }
+    body { padding: 24px 12px 60px; }
+  }
+  @media (max-width: 540px) {
+    .blocks-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">СРЕДА</div>
+    <div class="sub">Карта продукта и путь участника</div>
+    <div class="tagline">Среда регулярной перестройки мышления</div>
+  </div>
+
+  <!-- ЧЕТЫРЕ БЛОКА -->
+  <div class="blocks">
+    <div class="section-label">Из чего состоит продукт</div>
+    <div class="blocks-grid">
+      <div class="block-card b1">
+        <div class="block-num">Блок 01</div>
+        <span class="block-icon">🎙️</span>
+        <div class="block-title">Якорь</div>
+        <div class="block-hook">«Зачем возвращаться каждую неделю»</div>
+        <div class="block-desc">Живое присутствие Курпатова — разборы реальных ситуаций, голос методолога, столкновение с наукой. Не записанные лекции — живой материал каждую неделю.</div>
+      </div>
+      <div class="block-card b2">
+        <div class="block-num">Блок 02</div>
+        <span class="block-icon">👥</span>
+        <div class="block-title">Люди</div>
+        <div class="block-hook">«Ради кого ты здесь остаёшься»</div>
+        <div class="block-desc">Малые группы по типу мышления, пары, офлайн. Люди остаются не ради контента — ради конкретных девяти человек из своей десятки.</div>
+      </div>
+      <div class="block-card b3">
+        <div class="block-num">Блок 03</div>
+        <span class="block-icon">🔬</span>
+        <div class="block-title">Практика</div>
+        <div class="block-hook">«Как понимание становится действием»</div>
+        <div class="block-desc">AI-бадди и инструменты, которые превращают теорию в еженедельное действие. Наблюдение за собой, эксперименты, разборы конкретных ситуаций.</div>
+      </div>
+      <div class="block-card b4">
+        <div class="block-num">Блок 04</div>
+        <span class="block-icon">📈</span>
+        <div class="block-title">Память</div>
+        <div class="block-hook">«Как ты видишь, что изменился»</div>
+        <div class="block-desc">Личный архив, квартальные срезы, письмо из прошлого. Делают прогресс видимым — и создают капитал, который жалко бросить.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МАТРИЦА + КАРТОЧКИ -->
+  <div class="matrix-section">
+    <div class="section-label">Что и когда происходит — наведи на карточку</div>
+
+    <div class="big-grid">
+
+      <!-- HEADER -->
+      <div class="col-hdr corner"></div>
+      <div class="col-hdr h1">
+        <span class="hdr-icon">🎙️</span>
+        <span class="hdr-title">Якорь</span>
+        <span class="hdr-sub">Курпатов</span>
+      </div>
+      <div class="col-hdr h2">
+        <span class="hdr-icon">👥</span>
+        <span class="hdr-title">Люди</span>
+        <span class="hdr-sub">Группы</span>
+      </div>
+      <div class="col-hdr h3">
+        <span class="hdr-icon">🔬</span>
+        <span class="hdr-title">Практика</span>
+        <span class="hdr-sub">Инструменты</span>
+      </div>
+      <div class="col-hdr h4">
+        <span class="hdr-icon">📈</span>
+        <span class="hdr-title">Память</span>
+        <span class="hdr-sub">Архив</span>
+      </div>
+
+      <!-- ROW: ДЕНЬ 1 -->
+      <div class="row-lbl r-odd"><div class="row-lbl-text">День<br>первый</div></div>
+      <div class="gcell c1 r-odd"></div>
+      <div class="gcell c2 r-odd"></div>
+      <div class="gcell c3 r-odd">
+        <div class="mc b3">
+          <span class="mc-icon">🤖</span>
+          <div class="mc-name">AI-бадди — диагностика и маршрут</div>
+          <div class="mc-desc">Тип мышления, персональный маршрут, задачи на весь путь.</div>
+          <div class="tip">10 вопросов о том, что болит прямо сейчас. Бадди определяет тип мышления по 3mind.ru (Конструктор / Центрист / Хроник) и строит маршрут: какие разборы смотреть первыми, в какую группу ты попадёшь, какая первая задача. Всё что бадди делает дальше — заточено под твой тип.</div>
+        </div>
+      </div>
+      <div class="gcell c4 r-odd">
+        <div class="mc b4">
+          <span class="mc-icon">🗺️</span>
+          <div class="mc-name">Карта убеждений</div>
+          <div class="mc-desc">«Я не умею...» — снимок тебя сегодня.</div>
+          <div class="tip">Пять убеждений о себе — просто зафиксировать, не анализировать. Раз в квартал бадди возвращает их и показывает дельту. Убеждения меняются незаметно — этот инструмент делает изменение видимым.</div>
+        </div>
+        <div class="mc b4">
+          <span class="mc-icon">✉️</span>
+          <div class="mc-name">Письмо себе через 6 месяцев</div>
+          <div class="mc-desc">Что болит. Чего хочется. Запечатывается.</div>
+          <div class="tip">Письмо запечатывается. Ты про него забудешь. Через шесть месяцев бадди вернёт его тебе. Это станет самым сильным моментом за всё время в СРЕДЕ. Люди не уходят, не получив своё письмо.</div>
+        </div>
+      </div>
+
+      <!-- ROW: КАЖДЫЙ ДЕНЬ -->
+      <div class="row-lbl r-even"><div class="row-lbl-text">Каждый<br>день</div></div>
+      <div class="gcell c1 r-even"></div>
+      <div class="gcell c2 r-even"></div>
+      <div class="gcell c3 r-even">
+        <div class="mc b3">
+          <span class="mc-icon">⏸️</span>
+          <div class="mc-name">«Стоп-кадр»</div>
+          <div class="mc-desc">Случайный сигнал. 60 сек. Три вопроса.</div>
+          <div class="tip">В случайный момент дня бот присылает одно слово: «Стоп». 60 секунд — три вопроса: что думаю, что чувствую в теле, что собираюсь сделать. Тренировка паузы между стимулом и реакцией.</div>
+        </div>
+        <div class="mc b3">
+          <span class="mc-icon">🔄</span>
+          <div class="mc-name">«Автопилот-детектор»</div>
+          <div class="mc-desc">Осознанно / автопилот / не знаю.</div>
+          <div class="tip">Раз в день в случайное время — один вопрос: «Что делал последние 2 часа — осознанно или на автопилоте?» Через месяц бадди покажет карту: когда и в каких ситуациях ты перестаёшь думать.</div>
+        </div>
+      </div>
+      <div class="gcell c4 r-even"></div>
+
+      <!-- ROW: КАЖДУЮ НЕДЕЛЮ -->
+      <div class="row-lbl r-odd"><div class="row-lbl-text">Каждую<br>неделю</div></div>
+      <div class="gcell c1 r-odd">
+        <div class="mc b1">
+          <span class="mc-icon">🎙️</span>
+          <div class="mc-name">Живой разбор Курпатова</div>
+          <div class="mc-desc">Пятница. Реальные ситуации — не лекция.</div>
+          <div class="tip">Живой эфир. Участники присылают ситуации через бота заранее. Курпатов разбирает 4–5 кейсов как методолог — какой механизм мышления здесь работает. Запись в архиве по теме: отношения, тревога, деньги, решения.</div>
+        </div>
+        <div class="mc b1">
+          <span class="mc-icon">🎯</span>
+          <div class="mc-name">Вопрос недели</div>
+          <div class="mc-desc">Методологический прицел. Понедельник.</div>
+          <div class="tip">Каждый понедельник — один вопрос для самонаблюдения лично от Курпатова. Не мотивационная цитата — инструмент. «Замечай, когда принимаешь решение из страха, а не из интереса».</div>
+        </div>
+        <div class="mc b1">
+          <span class="mc-icon">🎧</span>
+          <div class="mc-name">«Голос Курпатова»</div>
+          <div class="mc-desc">3–5 мин голосом. Живой поток мыслей.</div>
+          <div class="tip">Раз в неделю — аудио без сценария. Курпатов говорит про то, что думает прямо сейчас: наблюдение, замеченный паттерн, мысль из работы. Создаёт ощущение присутствия автора между эфирами.</div>
+        </div>
+      </div>
+      <div class="gcell c2 r-odd">
+        <div class="mc b2">
+          <span class="mc-icon">🤝</span>
+          <div class="mc-name">«Связка двух»</div>
+          <div class="mc-desc">Пара с другим типом. 7 мин голосовым.</div>
+          <div class="tip">Внутри десятки — пара с другим типом мышления. Обменяться одним наблюдением из Лаборатории. 7 минут голосовым. Микросвязи удерживают сильнее большой группы.</div>
+        </div>
+        <div class="mc b2">
+          <span class="mc-icon">💬</span>
+          <div class="mc-name">Чаты по жизненным задачам</div>
+          <div class="mc-desc">Отношения, деньги, дети — разборы, не советы.</div>
+          <div class="tip">Чаты по темам: Тревога, Отношения, Деньги, Карьера, Самооценка, Дети, Бизнес. Одно правило: не советы и жалобы, а разборы ситуаций по методологии.</div>
+        </div>
+      </div>
+      <div class="gcell c3 r-odd">
+        <div class="mc b3">
+          <span class="mc-icon">🔬</span>
+          <div class="mc-name">Лаборатория N=1</div>
+          <div class="mc-desc">Гипотеза → наблюдение → вывод.</div>
+          <div class="tip">Понедельник — гипотеза. Неделя — наблюдение. Воскресенье — вывод. Тема задачи привязана к типу мышления. Конструктор, Центрист и Хроник получают разные задачи.</div>
+        </div>
+        <div class="mc b3">
+          <span class="mc-icon">📋</span>
+          <div class="mc-name">«Доска ситуаций»</div>
+          <div class="mc-desc">Анонимный тупик → попасть на эфир.</div>
+          <div class="tip">Анонимная публикация тупика в общий канал. Другие отвечают наблюдением. Курпатов раз в неделю выбирает одну ситуацию для разбора на эфире.</div>
+        </div>
+        <div class="mc b3">
+          <span class="mc-icon">🔍</span>
+          <div class="mc-name">«Поймай искажение»</div>
+          <div class="mc-desc">Диагноз мышления — не совет.</div>
+          <div class="tip">Раз в неделю — анонимная ситуация в чат. Задача: назвать когнитивное искажение по методологии Курпатова. Тренируешься на чужих — замечаешь у себя автоматически.</div>
+        </div>
+        <div class="mc b3">
+          <span class="mc-icon">🕯️</span>
+          <div class="mc-name">«Тихий час»</div>
+          <div class="mc-desc">Воскресенье. 60 мин. Поток сознания.</div>
+          <div class="tip">Раз в неделю в фиксированное время — 60 минут без соцсетей. Поток сознания в личный архив без цензуры. Тысячи людей делают это в одно время.</div>
+        </div>
+      </div>
+      <div class="gcell c4 r-odd">
+        <div class="mc b4">
+          <span class="mc-icon">📚</span>
+          <div class="mc-name">Архив личных выводов</div>
+          <div class="mc-desc">Пополняется еженедельно. Паттерны видны через 3 месяца.</div>
+          <div class="tip">Все выводы из Лаборатории, инсайты из разборов — в профиле в мини-аппе. Через 3 месяца видишь 12 наблюдений подряд. Накопленный капитал, который жалко бросать. Главный механизм против оттока.</div>
+        </div>
+      </div>
+
+      <!-- ROW: РАЗ В 2 НЕДЕЛИ -->
+      <div class="row-lbl r-even"><div class="row-lbl-text">Раз в<br>2 нед.</div></div>
+      <div class="gcell c1 r-even"></div>
+      <div class="gcell c2 r-even">
+        <div class="mc b2">
+          <span class="mc-icon">👥</span>
+          <div class="mc-name">Встреча десятки — 60 мин по протоколу</div>
+          <div class="mc-desc">10 человек разных типов. Разбор одной ситуации.</div>
+          <div class="tip">Группа из 10 человек — разнородный состав по типам из «Троицы». 60 минут строго: 10 мин — каждый одним предложением о неделе → 35 мин — разбор одной ситуации по методологии (не советы — наблюдения) → 15 мин — вывод. Капитан ведёт.</div>
+        </div>
+      </div>
+      <div class="gcell c3 r-even">
+        <div class="mc b3">
+          <span class="mc-icon">🛠️</span>
+          <div class="mc-name">«Инструмент недели»</div>
+          <div class="mc-desc">Факт-карта, Векторное кольцо — на живом материале.</div>
+          <div class="tip">Живой практикум по одному инструменту методологии: факт-карта, Векторное кольцо, матрица решений. 1–2 участника разбирают свою ситуацию через инструмент — потом ты применяешь к своей.</div>
+        </div>
+        <div class="mc b3">
+          <span class="mc-icon">⚗️</span>
+          <div class="mc-name">«Эксперимент недели»</div>
+          <div class="mc-desc">Нейронаука на практике. Курпатов комментирует.</div>
+          <div class="tip">Один поведенческий эксперимент от Курпатова, основанный на нейронаучных исследованиях. Все делают, фиксируют, обсуждают. Курпатов комментирует итоги.</div>
+        </div>
+      </div>
+      <div class="gcell c4 r-even"></div>
+
+      <!-- ROW: РАЗ В МЕСЯЦ -->
+      <div class="row-lbl r-odd"><div class="row-lbl-text">Раз в<br>месяц</div></div>
+      <div class="gcell c1 r-odd">
+        <div class="mc b1">
+          <span class="mc-icon">🧠</span>
+          <div class="mc-name">Подкасты с учёными</div>
+          <div class="mc-desc">Курпатов + нейробиолог. Столкновение мышлений.</div>
+          <div class="tip">Дважды в месяц — живой диалог Курпатова с нейробиологом или исследователем. Не лекция — столкновение двух мышлений. Создаёт ощущение интеллектуального клуба.</div>
+        </div>
+        <div class="mc b1">
+          <span class="mc-icon">❓</span>
+          <div class="mc-name">«Вопрос Курпатову»</div>
+          <div class="mc-desc">Про большое. Голосовые ответы на лучшие.</div>
+          <div class="tip">Сбор вопросов через бот — про идеи, науку, мышление, устройство жизни. Курпатов выбирает 5–7 и отвечает голосом, 2–3 мин на каждый.</div>
+        </div>
+      </div>
+      <div class="gcell c2 r-odd">
+        <div class="mc b2">
+          <span class="mc-icon">💬</span>
+          <div class="mc-name">«Разговор двух типов»</div>
+          <div class="mc-desc">Random coffee. Другой тип. 30 минут.</div>
+          <div class="tip">Алгоритм сводит тебя с участником другого типа на 30 минут по структурированным вопросам. После — одно наблюдение: что есть у другого типа, чего нет у тебя.</div>
+        </div>
+        <div class="mc b2">
+          <span class="mc-icon">⚔️</span>
+          <div class="mc-name">«Дебаты»</div>
+          <div class="mc-desc">Типы мышления друг против друга. Живой эфир.</div>
+          <div class="tip">Команды с разными типами мышления отстаивают противоположные позиции. «Одиночество — болезнь или выбор». Не спор — методологическое столкновение.</div>
+        </div>
+        <div class="mc b2">
+          <span class="mc-icon">🏙️</span>
+          <div class="mc-name">Офлайн в городе</div>
+          <div class="mc-desc">Онлайн-связи становятся реальными людьми.</div>
+          <div class="tip">Встреча всех местных. 30 мин — разбор кейса → 30 мин — нетворкинг между десятками → 30 мин — свободно. Лидер города из участников.</div>
+        </div>
+      </div>
+      <div class="gcell c3 r-odd">
+        <div class="mc b3">
+          <span class="mc-icon">🎬</span>
+          <div class="mc-name">Мини-курсы по микро-болям</div>
+          <div class="mc-desc">«Прокрастинация», «Боюсь знакомиться» — 1.5 ч.</div>
+          <div class="tip">1–1.5 часа по конкретной боли: «Пережить расставание», «Боюсь зарабатывать больше», «У ребёнка нет интереса». Иногда с приглашёнными экспертами.</div>
+        </div>
+      </div>
+      <div class="gcell c4 r-odd">
+        <div class="mc b4">
+          <span class="mc-icon">🪞</span>
+          <div class="mc-name">«Слепое пятно»</div>
+          <div class="mc-desc">Десятка видит то, что ты о себе не замечаешь.</div>
+          <div class="tip">Раз в месяц десятка анонимно отвечает: «Какой паттерн мышления ты замечаешь у этого человека, который он сам не видит?» Бадди присылает ответы рядом с выдержкой из твоего архива.</div>
+        </div>
+      </div>
+
+      <!-- ROW: РАЗ В КВАРТАЛ -->
+      <div class="row-lbl r-even"><div class="row-lbl-text">Раз в<br>квартал</div></div>
+      <div class="gcell c1 r-even"></div>
+      <div class="gcell c2 r-even"></div>
+      <div class="gcell c3 r-even"></div>
+      <div class="gcell c4 r-even">
+        <div class="mc b4">
+          <span class="mc-icon">📊</span>
+          <div class="mc-name">Карта изменений — квартальный срез</div>
+          <div class="mc-desc">Те же вопросы, что на входе. Конкретная дельта.</div>
+          <div class="tip">Бадди предлагает ответить на те же 10 вопросов, что были на входе. Сравнение с ответами 3 месяца назад. Дельта по паттернам: тревога была 8, стала 5. Это факт, не ощущение.</div>
+        </div>
+        <div class="mc b4">
+          <span class="mc-icon">🗺️</span>
+          <div class="mc-name">Обновление карты убеждений</div>
+          <div class="mc-desc">Написать снова — не глядя. Потом сравнить.</div>
+          <div class="tip">Те же 5 убеждений из первого дня — написать снова, не глядя на старые. Потом бадди показывает их рядом. Убеждения меняются так медленно, что это единственный способ увидеть.</div>
+        </div>
+      </div>
+
+      <!-- ROW: 3+ МЕСЯЦА -->
+      <div class="row-lbl r-odd"><div class="row-lbl-text">3+<br>месяца</div></div>
+      <div class="gcell c1 r-odd"></div>
+      <div class="gcell c2 r-odd">
+        <div class="mc b2">
+          <span class="mc-icon">🏅</span>
+          <div class="mc-name">Стать капитаном десятки</div>
+          <div class="mc-desc">Вести разборы — значит видеть паттерны точнее всего.</div>
+          <div class="tip">Капитаны — участники от 3 месяцев, прошедшие обучение по разборам. Закрытый чат с Курпатовым. Ежемесячный разбор ситуаций из групп лично с Курпатовым. Скидка на подписку.</div>
+        </div>
+      </div>
+      <div class="gcell c3 r-odd"></div>
+      <div class="gcell c4 r-odd"></div>
+
+      <!-- ROW: МЕСЯЦ 6 -->
+      <div class="row-lbl r-even"><div class="row-lbl-text">Месяц<br>шестой</div></div>
+      <div class="gcell c1 r-even"></div>
+      <div class="gcell c2 r-even"></div>
+      <div class="gcell c3 r-even"></div>
+      <div class="gcell c4 r-even">
+        <div class="mc b4">
+          <span class="mc-icon">✉️</span>
+          <div class="mc-name">«Письмо из прошлого» возвращается</div>
+          <div class="mc-desc">Бот присылает письмо из первого дня.</div>
+          <div class="tip">Ты будешь читать его три раза. Первый — узнаёшь человека. Второй — не узнаёшь. Третий — видишь дистанцию между тем, кем ты был, и кем стал. Это момент, который люди пересылают другим.</div>
+        </div>
+      </div>
+
+      <!-- ROW: ПРИ ВЫХОДЕ -->
+      <div class="row-lbl r-odd last"><div class="row-lbl-text">При<br>выходе</div></div>
+      <div class="gcell c1 r-odd last"></div>
+      <div class="gcell c2 r-odd last"></div>
+      <div class="gcell c3 r-odd last"></div>
+      <div class="gcell c4 r-odd last">
+        <div class="mc b4">
+          <span class="mc-icon">🎁</span>
+          <div class="mc-name">«Итог пути»</div>
+          <div class="mc-desc">Персональный итог. Сохраняют — и возвращаются.</div>
+          <div class="tip">Сколько циклов Лаборатории пройдено, какие паттерны изменились, лучший разбор, цитата из твоих наблюдений. Не удержание — уважение к пути. Именно после этого чаще всего возвращаются.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-phrase">
+      Поведение меняет <span>среда</span> —<br>не воля, не знание.
+    </div>
+    <div class="freq-badges">
+      <div class="badge">Ежедневно</div>
+      <div class="badge">Каждую неделю</div>
+      <div class="badge">Раз в 2 недели</div>
+      <div class="badge">Раз в месяц</div>
+      <div class="badge">Раз в квартал</div>
+      <div class="badge">Раз в полгода</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
